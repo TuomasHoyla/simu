@@ -451,7 +451,7 @@ public void publishTT(int currentYear) {
 	}
 
 
-	/** This is the main method for simulation
+	/** This is the main method for simulation 2
 	 * @param args
 	 */
 	public static void main(String[] args) {
