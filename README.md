@@ -1,5 +1,6 @@
-# simu
-simulation
+# simulation
+
+Git instructions
 
 1 Go to folder you want to use and type
 
