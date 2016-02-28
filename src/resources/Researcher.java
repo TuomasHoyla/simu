@@ -1,9 +1,7 @@
 package resources;
 import java.util.Vector;
 
-import ui.*;
-
-import org.apache.commons.math3.genetics.ElitisticListPopulation;
+import main.*;
 
 public class Researcher  {
 

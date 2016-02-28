@@ -1,5 +1,5 @@
 package resources;
-import ui.*;
+import main.*;
 public class Paper {
 	static RandomGenerator randGenerator = new RandomGenerator();
 	

@@ -1,13 +1,44 @@
 package main;
 
+/** TODO
+ * 
+ * - simulointi-luokkaa pitänee faktoroida niin, että irrotetaan organisaatioon liittyvät osat (organisaatiokohtainen tutkijapooli, rekrytointi ja promootiomekanismit jne) omaksi luokakseen, mikä mahdollistaisi jatkossa useamman organisaation simuloinnin ja jättäisi simulointiluokan vastaamaan kokonaisuuden rakenteesta ja simulointikokeen ajamisesta
+- Model luokan sisällöistä irrotetaan osa experiment-luokaksi (koekaavion hallinta ja mallin muokkaus faktori faktorilta, toistojen määrät yms, syöttö ja tulostiedostot
+- mallin sisällölliset luokat (kuten Researcher, paper uusi organisation luokka) kirjoitetaan takaisin käyttämään sisäisiä muuttujia (Model-luokan muuttujien sijaan) ja lisätään config tms metodi, joka alustaa sisäiset vakiot/parametrit Model-luokan pohjalta. Tällöin Model-luokkaan tehtävät viittaukset voivat olla tarvittaessa epäsuorempia. mahdollisesti sisältöluokat vastaisivat omasta tiedon monitoroinnistaan.
+
+Kokonaiskuva olisi jotain seuraavan kaltaista:
+- luetaan "experiment_config" -tiedosto, joka määrittelee simuloinnin keston, toistot, mittauspisteet sekä koekaavion (faktorit, tasot) ja mallin oletuskonfiguraation tiedoston ja tulostiedostot kuvausteksteineen
+- luetaan mallin oletuskonfi (parametrien nimi + arvoparit)
+- parseroidaan koekaavio ja jokaiselle tunnistetulle kokeelle
+-- alustetaan malli oletusarvoon
+-- konfataan malli a.o. kokeen faktorien mukaan
+-- alustetaan mallin sisältöluokat konfatun mallin mukaiseksi ja tulosmonitorit koesuunnitelman mukaisiksi
+-- simuloidaan koepisteen malliversio määritellyin toistoin
+-- tallennetaan tulokset
+
+Ainakin itsestäni tuo ylläkuvattu vaikuttaa pääosin suoraviivaiselta. Omat Java-taitoni tällä hetkellä ylittäviä osuuksia ovat
+- robusti tietojen luku
+
+- mallin virkarakenteen yleistäminen (nyt hard-koodattu neljä tasoa mutta n-tasoa olisi joustavampi). 
+En aikanaan onnistunut tekemään tutkijalistoista taulukkoa, jolloin saisi luupattua yli tasokohtaisten 
+listojen ja voisi pitää eri tasojen kohortit erillisinä
+
+- 2-k kokeen konfaus (tiedostosta luettavalle faktorilistalle ja k:n arvolle) 
+(edellyttänee jonkin tyyppistä rekursiota, jos k ei ole kiinteä) 
+[käytännössä experiment konfi voisi sisältää koekaavion tyyliin
+faktori; tasojen määrä; arvo1; arvo2; jne]
+ * 
+ */
 
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
 import resources.*;
+import configreader.getPropertyValues;
 
 public class simulation {
 	
@@ -450,17 +481,33 @@ public void publishTT(int currentYear) {
 
 	}
 
+	
 
-	/** This is the main method for simulation 3
+	/** This is the main method for simulation 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-		simulation test = new simulation();
-
-		test.simulate();
-
-
+		
+		//From package configreader
+		getPropertyValues configfile = new getPropertyValues();
+		
+		try {
+			//List all the properties
+			System.out.println(configfile.getPropValues());
+			
+			//print unique property
+			System.out.println(configfile.getPropValues().getProperty("populationsize"));
+		} catch (IOException e) {
+			System.out.println("No config found!");
+			e.printStackTrace();
+		}
+		
+		/**
+		 * Simulation itself added to comments for now, fileread example above
+		 */
+		//	simulation test = new simulation();
+		//	test.simulate();
+		
 	}
 
 }

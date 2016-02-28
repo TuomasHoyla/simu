@@ -2,7 +2,7 @@ package resources;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
-import ui.*;
+import main.*;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;

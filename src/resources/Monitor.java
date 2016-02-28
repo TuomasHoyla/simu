@@ -1,6 +1,5 @@
 package resources;
-import ui.*;
-import resources.*;
+import main.*;
 import java.io.*;
 
 
