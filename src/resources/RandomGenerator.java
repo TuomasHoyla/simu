@@ -199,28 +199,6 @@ public class RandomGenerator {
 		return (start+Math.random()*end);
 	}
 
-/*
-	public static void main(String[] args) {
-		/**
-		RandomGenerator rantsu = new RandomGenerator();
-		for (int i = 0; i < 20; i++) {
-		System.out.println(rantsu.createNormalDistributedValue(0, 0.1));
-		}
-		 
-		Model M = new Model();
-		RandomGenerator rantsu = new RandomGenerator();
-		//rantsu.Mic(m, beta, skill, t, immediacy, longevity)
-		
-		for (int i = 0; i < 20;i+=1){
-			System.out.println(i+" "+rantsu.createPoisson2(1));
-		}
-	
-		}
-	
-*/
-
-
-
 
 
 	public double createResSkill() {
@@ -234,10 +212,7 @@ public class RandomGenerator {
 			System.out.println("Res skill");
 			return 1.0;
 		}
-		
-		
-		
-		
+	
 	}
 
 

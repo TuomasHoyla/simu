@@ -56,33 +56,33 @@ public void updateCounters()
 {
 	for (int i=0;i<4; i++)
 	{
-		CumResearchersByLevels[i]+=simulation.ResearchersByLevels[i];
-		CumPapersByLevels[i]+=simulation.PapersByLevels[i];
-		CumCitationsByLevels[i]+=simulation.CitationsByLevels[i];
-		CumSkillByLevels[i]+=simulation.SkillByLevels[i];
-		CumCurrentCitations[i]+=simulation.CurrentCitations[i];
-		CumCurrentPapers[i]+=simulation.CurrentPapers[i];
-		CumResignByLevels[i]+=simulation.ResignByLevels[i];
-		CumPromoteByLevels[i]+=simulation.PromoteByLevels[i];
-		CumFrustrationByLevels[i]+=simulation.FrustrationByLevels[i];
-		CumRetirementAge[i]+=simulation.RetirementAge[i];
-		CumPromotionAge[i]+=simulation.PromotionAge[i];
+		CumResearchersByLevels[i]+=Organisation.ResearchersByLevels[i];
+		CumPapersByLevels[i]+=Organisation.PapersByLevels[i];
+		CumCitationsByLevels[i]+=Organisation.CitationsByLevels[i];
+		CumSkillByLevels[i]+=Organisation.SkillByLevels[i];
+		CumCurrentCitations[i]+=Organisation.CurrentCitations[i];
+		CumCurrentPapers[i]+=Organisation.CurrentPapers[i];
+		CumResignByLevels[i]+=Organisation.ResignByLevels[i];
+		CumPromoteByLevels[i]+=Organisation.PromoteByLevels[i];
+		CumFrustrationByLevels[i]+=Organisation.FrustrationByLevels[i];
+		CumRetirementAge[i]+=Organisation.RetirementAge[i];
+		CumPromotionAge[i]+=Organisation.PromotionAge[i];
 	}
-	cumCitationsFromRemoved+=simulation.citationsFromRemovedResearchers;
-	cumPapersFromRemoved+=simulation.papersFromRemovedResearchers;
+	cumCitationsFromRemoved+=Organisation.citationsFromRemovedResearchers;
+	cumPapersFromRemoved+=Organisation.papersFromRemovedResearchers;
 	cumRes+=res;
 }
 public void reportHeadings() {
-	System.out.println(simulation.M.narrative);
+	System.out.println(Organisation.M.narrative);
 }
 public void setHeadings() {
 	try {
-		FileRead.writeLines3(simulation.M.caseheader+"; Ladder; HeadCount; Skill; YearlyPapers; YearlyCitations; Resignations; Promotions; Frustration; RetirementAge; PromotionAge",simulation.M.datafile);		
+		FileRead.writeLines3(Organisation.M.caseheader+"; Ladder; HeadCount; Skill; YearlyPapers; YearlyCitations; Resignations; Promotions; Frustration; RetirementAge; PromotionAge",Organisation.M.datafile);		
 	} catch (FileNotFoundException | UnsupportedEncodingException e) {
 		e.printStackTrace();
 	}	
 	try {
-		FileRead.writeLines3(simulation.M.caseheader+"; Skill; Frustration; YearlyPapers; YearlyCitations; OldCitations; OldPapers; Recruitments",simulation.M.totalfile);		
+		FileRead.writeLines3(Organisation.M.caseheader+"; Skill; Frustration; YearlyPapers; YearlyCitations; OldCitations; OldPapers; Recruitments",Organisation.M.totalfile);		
 	} catch (FileNotFoundException | UnsupportedEncodingException e) {
 		e.printStackTrace();
 	}	
@@ -90,7 +90,7 @@ public void setHeadings() {
 }
 public void logNarrative() {
 	try {
-		FileRead.writeLines3(simulation.M.narrative,simulation.M.logfile);
+		FileRead.writeLines3(Organisation.M.narrative,Organisation.M.logfile);
 	} catch (FileNotFoundException | UnsupportedEncodingException e) {
 		e.printStackTrace();
 	}	
@@ -103,7 +103,7 @@ public void report(int y){
 		System.out.print("; "+CumCurrentPapers[i]/yd+"; "+CumCurrentCitations[i]/yd);
 		System.out.println("; "+CumResignByLevels[i]/yd+"; "+CumPromoteByLevels[i]/yd+"; "+CumFrustrationByLevels[i]/yd +"; "+CumRetirementAge[i]/yd+"; "+CumPromotionAge[i]/yd);
 		*/
-		System.out.print(simulation.M.instanssi +"; "+(i+1)+"; "+CumResearchersByLevels[i]/yd+"; "+CumSkillByLevels[i]/CumResearchersByLevels[i]);
+		System.out.print(Organisation.M.instanssi +"; "+(i+1)+"; "+CumResearchersByLevels[i]/yd+"; "+CumSkillByLevels[i]/CumResearchersByLevels[i]);
 		System.out.print("; "+CumCurrentPapers[i]/CumResearchersByLevels[i]+"; "+CumCurrentCitations[i]/CumResearchersByLevels[i]);
 		System.out.println("; "+CumResignByLevels[i]/CumResearchersByLevels[i]+"; "+CumPromoteByLevels[i]/CumResearchersByLevels[i]+"; "+CumFrustrationByLevels[i]/CumResearchersByLevels[i] +"; "+CumRetirementAge[i]/CumResignByLevels[i]+"; "+CumPromotionAge[i]/(CumPromoteByLevels[i]+0.0001));
 		
@@ -120,19 +120,19 @@ public void logReport(int y){
 		line+="; "+CumCurrentPapers[i]/yd+"; "+CumCurrentCitations[i]/yd;
 		line+="; "+CumResignByLevels[i]/yd+"; "+CumPromoteByLevels[i]/yd+"; "+CumFrustrationByLevels[i]/yd +"; "+CumRetirementAge[i]/yd+"; "+CumPromotionAge[i]/yd;
 		*/
-		line=simulation.M.instanssi +"; "+(i+1)+"; "+CumResearchersByLevels[i]/yd+"; "+CumSkillByLevels[i]/CumResearchersByLevels[i];
+		line=Organisation.M.instanssi +"; "+(i+1)+"; "+CumResearchersByLevels[i]/yd+"; "+CumSkillByLevels[i]/CumResearchersByLevels[i];
 		line+="; "+(CumCurrentPapers[i]+0.00001)/CumResearchersByLevels[i]+"; "+(CumCurrentCitations[i]+.00001)/CumResearchersByLevels[i];
 		line+="; "+(CumResignByLevels[i]+.000001)/CumResearchersByLevels[i]+"; "+(CumPromoteByLevels[i]+.00001)/CumResearchersByLevels[i]+"; "+CumFrustrationByLevels[i]/CumResearchersByLevels[i] +"; "+(CumRetirementAge[i]+.00001)/CumResignByLevels[i]+"; "+CumPromotionAge[i]/(CumPromoteByLevels[i]+0.0001);
 		try {
-			FileRead.writeLines3(line,simulation.M.datafile);
+			FileRead.writeLines3(line,Organisation.M.datafile);
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}	
 	}
 	countTotals();
-	line= simulation.M.instanssi +"; "+TotalSkill/yd+"; "+TotalFrustration/yd+"; "+TotalCurrentPapers/yd+"; "+TotalCurrentCitations/yd+"; "+cumCitationsFromRemoved/yd+"; "+cumPapersFromRemoved/yd+"; "+cumResign/yd;
+	line= Organisation.M.instanssi +"; "+TotalSkill/yd+"; "+TotalFrustration/yd+"; "+TotalCurrentPapers/yd+"; "+TotalCurrentCitations/yd+"; "+cumCitationsFromRemoved/yd+"; "+cumPapersFromRemoved/yd+"; "+cumResign/yd;
 		try {
-			FileRead.writeLines3(line,simulation.M.totalfile);
+			FileRead.writeLines3(line,Organisation.M.totalfile);
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}	

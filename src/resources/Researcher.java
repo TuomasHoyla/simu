@@ -347,15 +347,15 @@ public class Researcher  {
 				this.papers.add(new Paper(1,1.0, this.getResearchSkill(), currentYear, 1, 1));
 			}				
 		
-		simulation.CurrentPapers[this.getPositionInOrganization()-1]+=paperCount;
+		simulation.O.CurrentPapers[this.getPositionInOrganization()-1]+=paperCount;
 		for (Paper paper : this.papers) {
-			simulation.CurrentCitations[this.getPositionInOrganization()-1]+= paper.updateCitationsTT(currentYear);
-			if(paper.isDead()) {simulation.removedPapers.add(paper);}
+			simulation.O.CurrentCitations[this.getPositionInOrganization()-1]+= paper.updateCitationsTT(currentYear);
+			if(paper.isDead()) {simulation.O.removedPapers.add(paper);}
 		}
-		for(Paper lappu:simulation.removedPapers) {
+		for(Paper lappu:simulation.O.removedPapers) {
 			this.papers.remove(lappu);
 		}
-		simulation.removedPapers.clear();
+		simulation.O.removedPapers.clear();
 
 	}
 }
