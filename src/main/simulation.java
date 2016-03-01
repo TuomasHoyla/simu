@@ -54,91 +54,6 @@ public class simulation {
 
 
 
-
-	public void grantAllocation(double arviointiVirhe) {
-		ArrayList<Researcher> temp2 = new ArrayList<>();
-		ArrayList<Researcher> temp3 = new ArrayList<>();
-		ArrayList<Researcher> temp4 = new ArrayList<>();
-		double nettoTutkimusResurssit = (1-M.overhead)*M.maksimiTutkimusResurssi*M.AllocatableResource; 		
-		double varmatTutkimusResurssit = nettoTutkimusResurssit*M.kuinkaPaljonJaetaanTasan; 
-		double varmatTutkimusResurssitPerTutkija = varmatTutkimusResurssit/researcherArray.size();
-		funder.varmaFunding = varmatTutkimusResurssitPerTutkija;
-
-		for (Researcher researcher: researcherArray) {
-			researcher.setQualityOfApplication(arviointiVirhe);
-			int taso =researcher.getPositionInOrganization();
-			if (taso==2) {
-				temp2.add(researcher);
-			}
-			if (taso==3) {
-				temp3.add(researcher);
-			}
-			if (taso==4) {
-				temp4.add(researcher);
-			}
-		}
-		for (Researcher researcher: temp2)
-		{
-			researcherArray.remove(researcher);
-		}
-		for (Researcher researcher: temp3)
-		{
-			researcherArray.remove(researcher);
-		}
-		for (Researcher researcher: temp4)
-		{
-			researcherArray.remove(researcher);
-		}
-		
-		Collections.sort(researcherArray, vertaaja);
-
-		Collections.reverse(researcherArray);
-		funder.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*researcherArray.size()/M.PopulationSize; 
-		for (Researcher researcher: researcherArray) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.setFunds(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-		}
-		Collections.sort(temp2, vertaaja);
-
-		Collections.reverse(temp2);
-		funder.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*temp2.size()/M.PopulationSize; 
-		for (Researcher researcher: temp2) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.setFunds(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-			researcherArray.add(researcher);
-		}
-		Collections.sort(temp3, vertaaja);
-
-		Collections.reverse(temp3);
-		funder.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*temp3.size()/M.PopulationSize; 
-		for (Researcher researcher: temp3) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.setFunds(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-			researcherArray.add(researcher);
-		}
-		Collections.sort(temp4, vertaaja);
-
-		Collections.reverse(temp4);
-		funder.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*temp4.size()/M.PopulationSize; 
-		for (Researcher researcher: temp4) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.setFunds(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-			researcherArray.add(researcher);
-		}
-		temp2.clear();
-		temp3.clear();
-		temp4.clear();
-	}
-	
-
 	public void iterate (int count){
 		for (int loop=0; loop< count; loop++) 
 		{
@@ -154,7 +69,7 @@ public class simulation {
 		}
 		
 	}
-	public void simulate(String configurationfile)  {
+	public void simulate()  {
 /*		
 M.readExperiment(configurationfile);
 M.readModel();
@@ -179,12 +94,12 @@ mon.logNarrative();
 
 */
 		M.resetGrant();
-		M.configureFulltest64b(0);; //to initialize the headings
+		M.configure(0);; //to initialize the headings
 		mon.setHeadings();
 		M.setNarrative();
-		for(int koe=0; koe<64 ; koe++) 
+		for(int koe=1; koe<13 ; koe++) 
 		{
-			M.configureFulltest64b(koe);
+			M.configure(koe);
 			O.initialize();
 			mon.resetCounters();
 			iterate(100); //warm up
@@ -212,7 +127,8 @@ mon.logNarrative();
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+
+		/*
 		//From package configreader
 		getPropertyValues configfile = new getPropertyValues();
 		
@@ -226,12 +142,13 @@ mon.logNarrative();
 			System.out.println("No config found!");
 			e.printStackTrace();
 		}
+		*/
 		
 		/**
 		 * Simulation itself added to comments for now, fileread example above
 		 */
-		//	simulation test = new simulation();
-		//	test.simulate();
+			simulation test = new simulation();
+			test.simulate();
 		
 	}
 

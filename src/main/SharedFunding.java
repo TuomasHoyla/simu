@@ -68,7 +68,7 @@ public class SharedFunding {
 		int ii=0;
 		for(int i=4; i>0; i--) {
 			funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*headcount[i-1]/simulation.M.PopulationSize; 
-			int iii=ii+headcount[i];	
+			int iii=ii+headcount[i-1];	
 			for (Researcher researcher: simulation.O.researcherArray.subList(ii, iii)) {
 				researcher.setResourcesNeededToBeMotivated(simulation.M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
 				researcher.setMoney(varmatTutkimusResurssitPerTutkija); 

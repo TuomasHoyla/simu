@@ -1,9 +1,10 @@
 package resources;
 
 public class Model {
-	public String totalfile="result/totalfile.txt";
-	public String datafile = "result/datafile.txt";
-	public String logfile="result/logfile.txt";
+	public String dir="C:/MyTemp/tmp/fundingfun/results/";
+	public String totalfile=dir+"totalfile.txt";
+	public String datafile = dir+"datafile.txt";
+	public String logfile=dir+"logfile.txt";
 	public String caseheader ="Case";
 	public String instanssi;
 	public String narrative;
@@ -155,9 +156,9 @@ public class Model {
 		// 1-12 hakemuksettomat skeemat perusvertailu
 		case 0: {
 			// initialize the headings
-			logfile="result/logfile_test.txt";
-			totalfile="result/totalfile_test.txt";
-			datafile="result/datafile_test.txt";
+			logfile=dir+"logfile_test.txt";
+			totalfile=dir+"totalfile_test.txt";
+			datafile=dir+"datafile_test.txt";
 			caseheader="Case; Frustration; Promotion";
 			break;
 		}
