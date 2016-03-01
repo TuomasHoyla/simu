@@ -58,11 +58,11 @@ public class simulation {
 		for (int loop=0; loop< count; loop++) 
 		{
 			O.RemoveResearchers();
-			O.TTpromote();
+			O.promote();
 			O.AddResearchers();
 			funder.allocate();
 			O.compareReceivedMoney(); //Compare what got and what not, sets frustration and productivity
-			O.publishTT(year);
+			O.publish(year);
 			O.CountByLevels();
 			mon.updateCounters();
 			year++;

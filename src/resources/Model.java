@@ -11,15 +11,15 @@ public class Model {
 //simulation related parameters	
 	public String allocationScheme;
 	public String evaluationErrorModel;
-	public double arviointiVirhe=0.;
+	public double evaluationError=0.;
 	public double overhead = 0; // 0 - 1
-	public double kuinkaPaljonJaetaanTasan = 0; //0 -1
-	public double maksimiTutkimusResurssi = 0.63; //0.63
-	public double kuinkaPaljonMaksimiTutkimisResurssistaHalutaan = 1.;	
+	public double evenlyDistributedPart=0.;
+	public double maximumResearchEffort =1.;
+	public double desiredResearchEffort=1.;
 	public int PopulationSize = 100;
 	public int[] PositionLevels = new int[4];
-	public double AllocatableResource = 35.;
-	public double odotusResurssi;
+	public double AllocatableResource;
+	public double averageResource;
 	public String promotionModel;
 	public double promotionTreshold;
 	public String publishingModel;
@@ -29,9 +29,9 @@ public class Model {
 	public String paperQualityModel;
 
 // researcher related parameters
-	public double oletusTutkimusAika = 0; //0.2325; //aika joka kaikilla käytössä
+	public double defaultResearchTime =0;
 	public double neededToBeMotivated= 1; //pidetään vakiona (käytetään vain konstruktorissa nyt)
-	public double hakemisenOsuus=0.5; // hakemisen aika osuutena oletustutkimusajasta 
+	public double applyingIntensity=0.5;
 	public double defaultMonetaryFrustration = 0;
 	public String monetaryFrustrationModel;
 	public double frustrationGrowthRate =0.1;
@@ -49,7 +49,7 @@ public class Model {
 	public double frustrationProductivityWeight;
 	public double monetaryProductivityWeight;
 	public String applicationQualityModel;
-	public double aq1=1.;
+	public double resSkillWeight=1.;
 	
 	public String citationModel; // for Paper
 	
@@ -64,18 +64,18 @@ public class Model {
 
 
 	public void resetGrant(){
-		double resource =50;
+		double resourceLevel =.5;// strictly more than 0
 		PopulationSize = 100;
-		maksimiTutkimusResurssi = 1; 
+		maximumResearchEffort = 1; 
 		PositionLevels[0] = 25; PositionLevels[1]=25; PositionLevels[2]=25; PositionLevels[3]=25;
 		allocationScheme="Grant";
-		oletusTutkimusAika=0.*resource/PopulationSize;
-		AllocatableResource = resource-PopulationSize*oletusTutkimusAika;
-		publishingScale=PopulationSize/resource; 
-		odotusResurssi=AllocatableResource/PopulationSize;
-		kuinkaPaljonMaksimiTutkimisResurssistaHalutaan = 1-oletusTutkimusAika;	
+		defaultResearchTime=0.*resourceLevel;
+		AllocatableResource = PopulationSize*(resourceLevel-defaultResearchTime);
+		publishingScale=1./resourceLevel; 
+		averageResource=AllocatableResource/PopulationSize;
+		desiredResearchEffort = 1-defaultResearchTime;	
 
-		kuinkaPaljonJaetaanTasan = 0; //0 -1
+		evenlyDistributedPart = 0; //0 -1
 		overhead = 0; // 0 - 100%
 
 		publishingModel="Flatrate";
@@ -83,20 +83,20 @@ public class Model {
 		publishingOffset=1.;
 
 		evaluationErrorModel="Blended"; 
-		arviointiVirhe=0.;
+		evaluationError=0.;
 		paperQualityModel = "Random_Skill_based";
 
 	// researcher related parameters
-		hakemisenOsuus=0.; // hakemisen aika osuutena oletustutkimusajasta 
+		applyingIntensity=0.; // hakemisen aika osuutena oletustutkimusajasta 
 		
 		defaultMonetaryFrustration = 0;
 //		monetaryFrustrationModel="Scaled";
 		monetaryFrustrationModel="Tuned";
-		frustrationGrowthRate =0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[0]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[1]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[2]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[3]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
+		frustrationGrowthRate =0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[0]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[1]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[2]=0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[3]=0.05/(1-averageResource/desiredResearchEffort);
 		secondaryFrustrationRate=0.0;
 
 //		promotionModel = "Citation_based";
@@ -127,7 +127,7 @@ public class Model {
 		monetaryProductivityWeight=0.0; //no monetary productivity
 
 		applicationQualityModel="CombinedNormalized";
-		aq1=1.;
+		resSkillWeight=1.;
 		
 		citationModel="WangPoisson";
 		
@@ -164,7 +164,7 @@ public class Model {
 		}
 		case 1:{ //tasajako
 			allocationScheme="Lottery";	
-			kuinkaPaljonJaetaanTasan = 1; //0-1
+			evenlyDistributedPart = 1; //0-1
 			promotionTreshold=1.;
 			secondaryFrustrationRate=0.0;
 			instanssi="Communism; frus1;";
@@ -172,7 +172,8 @@ public class Model {
 		}
 		case 2:{//lotto
 			allocationScheme="Lottery";
-			kuinkaPaljonJaetaanTasan = 0; //0-1
+			evenlyDistributedPart = 0; //0-1
+			evaluationError=1.;
 			promotionTreshold=1.;
 			secondaryFrustrationRate=0.0;
 			instanssi="Lottery; frus1;";
@@ -180,7 +181,7 @@ public class Model {
 		}
 		case 3:{//oraakkeli
 			allocationScheme="Grant";
-			kuinkaPaljonJaetaanTasan = 0; //0-1
+			evenlyDistributedPart = 0; //0-1
 			promotionTreshold=1.;
 			secondaryFrustrationRate=0.0;
 			instanssi="Ideal; frus1;";
@@ -188,8 +189,8 @@ public class Model {
 		}
 		case 4:{// erehtyvä oraakkeli
 			allocationScheme="Grant";
-			arviointiVirhe=1.;
-			kuinkaPaljonJaetaanTasan = 0; //0-1	
+			evaluationError=0.5;
+			evenlyDistributedPart = 0; //0-1	
 			promotionTreshold=1.;
 			secondaryFrustrationRate=0.0;
 			instanssi="Imperfect; frus1;";
@@ -197,7 +198,7 @@ public class Model {
 		}
 		case 5:{ //tasajako
 			allocationScheme="Lottery";	
-			kuinkaPaljonJaetaanTasan = 1; //0-1
+			evenlyDistributedPart = 1; //0-1
 			instanssi="Communism; frus2;";
 			promotionTreshold=1.;
 			secondaryFrustrationRate=0.1;
@@ -206,7 +207,8 @@ public class Model {
 		}
 		case 6:{//lotto
 			allocationScheme="Lottery";
-			kuinkaPaljonJaetaanTasan = 0; //0-1	
+			evenlyDistributedPart = 0; //0-1	
+			evaluationError=1.;
 			instanssi="Lottery; frus2;";
 			promotionTreshold=1.;
 			secondaryFrustrationRate=0.1;
@@ -215,7 +217,7 @@ public class Model {
 		}
 		case 7:{//oraakkeli
 			allocationScheme="Grant";
-			kuinkaPaljonJaetaanTasan = 0; //0-1
+			evenlyDistributedPart = 0; //0-1
 			instanssi="Ideal; frus2;";
 			promotionTreshold=1.;
 			secondaryFrustrationRate=0.1;
@@ -224,8 +226,8 @@ public class Model {
 		}
 		case 8:{// erehtyvä oraakkeli
 			allocationScheme="Grant";
-			arviointiVirhe=.5;
-			kuinkaPaljonJaetaanTasan = 0; //0-1
+			evaluationError=.5;
+			evenlyDistributedPart = 0; //0-1
 			instanssi="Imperfect; frus2;";
 			promotionTreshold=1.;
 			promotionModel = "Position_based";
@@ -234,7 +236,7 @@ public class Model {
 		}
 		case 9:{ //tasajako
 			allocationScheme="Lottery";	
-			kuinkaPaljonJaetaanTasan = 1; //0-1
+			evenlyDistributedPart = 1; //0-1
 			instanssi="Communism; frus2; selective";
 			secondaryFrustrationRate=0.1;
 			promotionTreshold=1.5;
@@ -242,7 +244,8 @@ public class Model {
 		}
 		case 10:{//lotto
 			allocationScheme="Lottery";
-			kuinkaPaljonJaetaanTasan = 0; //0-1	
+			evenlyDistributedPart = 0; //0-1	
+			evaluationError=1.;
 			instanssi="Lottery; frus2; selective";
 			secondaryFrustrationRate=0.1;
 			promotionTreshold=1.5;
@@ -250,7 +253,7 @@ public class Model {
 		}
 		case 11:{//oraakkeli
 			allocationScheme="Grant";
-			kuinkaPaljonJaetaanTasan = 0; //0-1
+			evenlyDistributedPart = 0; //0-1
 			instanssi="Ideal; frus2; selective";
 			secondaryFrustrationRate=0.1;
 			promotionTreshold=1.5;
@@ -258,8 +261,8 @@ public class Model {
 		}
 		case 12:{// erehtyvä oraakkeli
 			allocationScheme="Grant";
-			arviointiVirhe=.5;
-			kuinkaPaljonJaetaanTasan = 0; //0-1
+			evaluationError=.5;
+			evenlyDistributedPart = 0; //0-1
 			instanssi="Imperfect; frus2; selective";
 			secondaryFrustrationRate=0.1;
 			promotionTreshold=1.5;
@@ -290,7 +293,7 @@ public class Model {
 
 		}
 		allocationScheme="Lottery";
-		kuinkaPaljonJaetaanTasan=x1;
+		evenlyDistributedPart=x1;
 		promotionTreshold=1.+ x2*0.2;
 		AllocatableResource=25+x3*8;
 		publishingScale=4-x3;
@@ -319,7 +322,7 @@ public class Model {
 
 		}
 		allocationScheme="Lottery";
-		kuinkaPaljonJaetaanTasan=x2;
+		evenlyDistributedPart=x2;
 		promotionTreshold=1.+ x3*0.2;
 		AllocatableResource=25+x4*8;
 		publishingScale=4-x4;
@@ -349,52 +352,52 @@ public class Model {
 		resource=50+x4*10;
 		publishingScale=100/resource;
 		AllocatableResource = resource;
-		odotusResurssi=AllocatableResource/PopulationSize;
+		averageResource=AllocatableResource/PopulationSize;
 		
 
 		switch(x2) {
 		case 0: {
 			instanssi="Communism;";
-			kuinkaPaljonJaetaanTasan=1;
+			evenlyDistributedPart=1;
 			break;
 		}
 		case 1: {
 			instanssi="Lottery;";
-			kuinkaPaljonJaetaanTasan=0.;
-			arviointiVirhe=1.;
+			evenlyDistributedPart=0.;
+			evaluationError=1.;
 			break;
 		}
 		case 2: {
 			instanssi="Realistic;";
-			kuinkaPaljonJaetaanTasan=0.0;//jaetaan oletustutkimusaikana
-			aq1=0.5;
-			arviointiVirhe=0.5;
-			oletusTutkimusAika=0.5*resource/PopulationSize;
-			AllocatableResource = resource-PopulationSize*oletusTutkimusAika;
+			evenlyDistributedPart=0.0;//jaetaan defaultResearchTimena
+			resSkillWeight=0.5;
+			evaluationError=0.5;
+			defaultResearchTime=0.5*resource/PopulationSize;
+			AllocatableResource = resource-PopulationSize*defaultResearchTime;
 			publishingScale=PopulationSize/resource; 
-			odotusResurssi=AllocatableResource/PopulationSize;
-			kuinkaPaljonMaksimiTutkimisResurssistaHalutaan = 1-oletusTutkimusAika;	
-			hakemisenOsuus=0.2; // eli 10% kokonaisresurssista
+			averageResource=AllocatableResource/PopulationSize;
+			desiredResearchEffort = 1-defaultResearchTime;	
+			applyingIntensity=0.2; // eli 10% kokonaisresurssista
 
 			overhead=0.05;
 			break;
 		}
 		case 3: {
 			instanssi="Ideal;";
-			kuinkaPaljonJaetaanTasan=0.;
-			aq1=1.;
-			arviointiVirhe=0.;
+			evenlyDistributedPart=0.;
+			resSkillWeight=1.;
+			evaluationError=0.;
 			break;
 		}
 		}
 		monetaryProductivityWeight=0.; 
 		frustrationProductivityWeight=1.;
 		monetaryFrustrationModel="Tuned";
-		frustrationGrowthRate =0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[0]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[1]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[2]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[3]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
+		frustrationGrowthRate =0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[0]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[1]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[2]=0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[3]=0.05/(1-averageResource/desiredResearchEffort);
 
 		if( x3==1) {promotionModel="Fixed_HC";}
 		secondaryFrustrationRate=0.+0.05*x5;
@@ -425,53 +428,53 @@ public class Model {
 		resource=10*(x3+2);
 		publishingScale=100/resource;
 		AllocatableResource = resource;
-		odotusResurssi=AllocatableResource/PopulationSize;
+		averageResource=AllocatableResource/PopulationSize;
 		
 
 		switch(x1) {
 		case 0: {
 			instanssi="Communism;";
 			allocationScheme="Communism";	
-			kuinkaPaljonJaetaanTasan=1;
+			evenlyDistributedPart=1;
 			break;
 		}
 		case 1: {
 			instanssi="Lottery;";
 			allocationScheme="Lottery";	
-			kuinkaPaljonJaetaanTasan=0.25*x2;
-			arviointiVirhe=1.;
+			evenlyDistributedPart=0.25*x2;
+			evaluationError=1.;
 			break;
 		}
 		case 2: {
 			instanssi="Realistic;";
-			oletusTutkimusAika=0.25*x2*resource/PopulationSize;
-			aq1=0.5;
-			arviointiVirhe=0.5;
-			AllocatableResource = resource-PopulationSize*oletusTutkimusAika;
+			defaultResearchTime=0.25*x2*resource/PopulationSize;
+			resSkillWeight=0.5;
+			evaluationError=0.5;
+			AllocatableResource = resource-PopulationSize*defaultResearchTime;
 			publishingScale=PopulationSize/resource; 
-			odotusResurssi=AllocatableResource/PopulationSize;
-			kuinkaPaljonMaksimiTutkimisResurssistaHalutaan = 1-oletusTutkimusAika;	
-			hakemisenOsuus=0.2; // eli 10% kokonaisresurssista
+			averageResource=AllocatableResource/PopulationSize;
+			desiredResearchEffort = 1-defaultResearchTime;	
+			applyingIntensity=0.2; // eli 10% kokonaisresurssista
 
 			overhead=0.05;
 			break;
 		}
 		case 3: {
-			kuinkaPaljonJaetaanTasan=0.25*x2;
+			evenlyDistributedPart=0.25*x2;
 			instanssi="Ideal; ";
-			aq1=1.;
-			arviointiVirhe=0.;
+			resSkillWeight=1.;
+			evaluationError=0.;
 			break;
 		}
 		}
 		monetaryProductivityWeight=0.; 
 		frustrationProductivityWeight=1.;
 		monetaryFrustrationModel="Tuned";
-		frustrationGrowthRate =0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[0]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[1]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[2]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[3]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
+		frustrationGrowthRate =0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[0]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[1]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[2]=0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[3]=0.05/(1-averageResource/desiredResearchEffort);
 		
 		secondaryFrustrationRate=0.;
 
@@ -505,30 +508,30 @@ public class Model {
 		case 0: {
 			instanssi="Communism;";
 			allocationScheme="Grant";	
-			kuinkaPaljonJaetaanTasan=1;
+			evenlyDistributedPart=1;
 			break;
 		}
 		case 1: {
 			instanssi="Lottery;";
 			allocationScheme="Grant";	
-			kuinkaPaljonJaetaanTasan=0.5;
-			arviointiVirhe=1.;
+			evenlyDistributedPart=0.5;
+			evaluationError=1.;
 			break;
 		}
 		case 2: {
 			instanssi="Realistic;";
-			aq1=0.5;
-			kuinkaPaljonJaetaanTasan=0.5;
-			arviointiVirhe=0.5;
+			resSkillWeight=0.5;
+			evenlyDistributedPart=0.5;
+			evaluationError=0.5;
 
 			overhead=0.05;
 			break;
 		}
 		case 3: {
 			instanssi="Ideal; ";
-			kuinkaPaljonJaetaanTasan=0.5;
-			aq1=1.;
-			arviointiVirhe=0.;
+			evenlyDistributedPart=0.5;
+			resSkillWeight=1.;
+			evaluationError=0.;
 			break;
 		}
 		}
@@ -550,7 +553,7 @@ public class Model {
 		}	
 		resetGrant();
 		applicationQualityModel="CombinedNormalized";
-		aq1=0.1*koe;
+		resSkillWeight=0.1*koe;
 		instanssi= "R"+koe*10;
 	
 		updateNarrative(instanssi);
@@ -563,9 +566,9 @@ public class Model {
 		}	
 		resetGrant();
 		applicationQualityModel="CombinedNormalized";
-		aq1=1.; // 
+		resSkillWeight=1.; // 
 		evaluationErrorModel="Blended";
-		arviointiVirhe=0.1*koe;
+		evaluationError=0.1*koe;
 		instanssi="E"+koe*10;
 	
 		updateNarrative(instanssi);
@@ -579,23 +582,23 @@ public class Model {
 		double resource=50;//kokonaisresurssi (oletus + jaettava)
 		resetGrant();
 		applicationQualityModel="CombinedNormalized";
-		aq1=0.5;
+		resSkillWeight=0.5;
 		evaluationErrorModel="Blended";
-		arviointiVirhe=0.5;
-		oletusTutkimusAika=0.5*resource/PopulationSize;//puolet
-		AllocatableResource = resource-PopulationSize*oletusTutkimusAika;
+		evaluationError=0.5;
+		defaultResearchTime=0.5*resource/PopulationSize;//puolet
+		AllocatableResource = resource-PopulationSize*defaultResearchTime;
 		publishingScale=PopulationSize/resource; 
-		odotusResurssi=AllocatableResource/PopulationSize;
-		kuinkaPaljonMaksimiTutkimisResurssistaHalutaan = 1-oletusTutkimusAika;	
-		hakemisenOsuus=0.1*koe;
+		averageResource=AllocatableResource/PopulationSize;
+		desiredResearchEffort = 1-defaultResearchTime;	
+		applyingIntensity=0.1*koe;
 		monetaryProductivityWeight=0.; 
 		frustrationProductivityWeight=1.;
 		monetaryFrustrationModel="Tuned";
-		frustrationGrowthRate =0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[0]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[1]=0.08/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[2]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-		frustrationRate[3]=0.05/(1-odotusResurssi/kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
+		frustrationGrowthRate =0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[0]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[1]=0.08/(1-averageResource/desiredResearchEffort);
+		frustrationRate[2]=0.05/(1-averageResource/desiredResearchEffort);
+		frustrationRate[3]=0.05/(1-averageResource/desiredResearchEffort);
 		secondaryFrustrationRate=0.;
 		fitnessSkillFactor=0.65; //!!!!
 		researchSkillParameter=Math.sqrt(fitnessVariance*fitnessSkillFactor);// 0.2 + random kerroin Tuomaksella
@@ -625,12 +628,12 @@ public class Model {
 		monetaryProductivityWeight=0.; 
 		frustrationProductivityWeight=1.;
 		secondaryFrustrationRate=0.;
-		oletusTutkimusAika=0.5*resource/PopulationSize;//puolet
-		AllocatableResource = resource-PopulationSize*oletusTutkimusAika;
+		defaultResearchTime=0.5*resource/PopulationSize;//puolet
+		AllocatableResource = resource-PopulationSize*defaultResearchTime;
 		publishingScale=PopulationSize/resource; 
-		odotusResurssi=AllocatableResource/PopulationSize;
-		kuinkaPaljonMaksimiTutkimisResurssistaHalutaan = 1-oletusTutkimusAika;	
-		hakemisenOsuus=0.2;
+		averageResource=AllocatableResource/PopulationSize;
+		desiredResearchEffort = 1-defaultResearchTime;	
+		applyingIntensity=0.2;
 
 		overhead=0.05;
 		fitnessSkillFactor=0.35;
@@ -638,11 +641,11 @@ public class Model {
 		paperQualityParameter=Math.sqrt(fitnessVariance*(1-fitnessSkillFactor));
 		skillParameter=researchSkillParameter; //sama jakauma molemmille taidoille
 
-		aq1=1-x1*0.2;
+		resSkillWeight=1-x1*0.2;
 		evaluationErrorModel="Blended";
-		arviointiVirhe=x2*0.2;
+		evaluationError=x2*0.2;
 		if(x0==1) {promotionModel="Fixed_HC";}
-		instanssi=x0+"; "+aq1+"; "+arviointiVirhe;
+		instanssi=x0+"; "+resSkillWeight+"; "+evaluationError;
 		updateNarrative(instanssi);
 	}
 

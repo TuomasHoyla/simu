@@ -18,14 +18,14 @@ public class Researcher  {
 	public double promotionalFrustration = 0;
 	private double totalFrustration;
 	public double ResourcesForResearch = 0;
-	private int positionInOrganization; //What would be the advantages for this to be enum instead?
+	private int positionInOrganization; 
 	private double resourcesNeededToBeMotivated;
 	private double productivity;
 	private double baseProductivity;
 	private double monetaryProductivity;
 	private double sackingProbability;
 	private boolean leavingOrganization;
-	private double skillsSummedUp;
+//	private double skillsSummedUp;
 	double timeUsedForApplying;
 	public Vector<Paper> papers = new Vector<Paper>(); 
 	private int paperCount;
@@ -69,10 +69,10 @@ public class Researcher  {
 		this.productivity = 1.0; //no need to be one...
 		this.leavingOrganization = false;
 		this.resourcesNeededToBeMotivated = simulation.M.neededToBeMotivated; //Average
-		this.skillsSummedUp = this.researchSkill + this.applyingSkill; //T�ll� hetkell� molemmat ovat yht� vahvoja
+//		this.skillsSummedUp = this.researchSkill + this.applyingSkill; //T�ll� hetkell� molemmat ovat yht� vahvoja
 	}
-	public void setMoney(double dallaDallaBillYall) {
-		ResourcesForResearch += dallaDallaBillYall;
+	public void setMoney(double grantAmount) {
+		ResourcesForResearch += grantAmount;
 	}
 	
 	public double getResourcesForResearch() {
@@ -95,11 +95,11 @@ public class Researcher  {
 	public void addApplyingSkill(double skill) {
 		applyingSkill += skill;
 	}
-
+/*
 	public double getSumSkill() {
 		return skillsSummedUp;
 	}
-
+*/
 	/**
 	 * Gives the parameter for application quality
 	 * @param normalDistributedSkill 1-efectivenessOfFundingProcess/100, is the distribution ratio
@@ -132,6 +132,41 @@ public class Researcher  {
 	}
 	public void setMonetaryFrustration() {
 		int temp = getPositionInOrganization()-1;
+		switch(simulation.M.monetaryFrustrationModel){
+		case("Linear_Decay"): {
+			monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationGrowthRate;
+			break;
+		}
+		case("BiExponential"):{
+			double res= ResourcesForResearch/resourcesNeededToBeMotivated;
+			if(res > 0.5) {monetaryFrustration-= monetaryFrustration*(res-0.5)*simulation.M.frustrationGrowthRate;}
+			if(res < 0.5) {monetaryFrustration+= (1-monetaryFrustration)*(0.5-res)*simulation.M.frustrationGrowthRate;}
+			break;
+		}
+		case("Scaled"): {
+			monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationGrowthRate;
+			if(ResourcesForResearch < simulation.M.averageResource){
+				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/(1-simulation.M.averageResource);
+			}
+			else {
+				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/simulation.M.averageResource;
+				if(monetaryFrustration <0.) {monetaryFrustration=0.;}
+			}
+			break;
+		}
+		case("Tuned"): {
+			monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationRate[temp];
+			if(ResourcesForResearch < simulation.M.averageResource){
+				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/(1-simulation.M.averageResource);
+			}
+			else {
+				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/simulation.M.averageResource;
+				if(monetaryFrustration <0.) {monetaryFrustration=0.;}
+			}
+			break;
+		}
+		}
+/*		
 		if(simulation.M.monetaryFrustrationModel=="Linear_Decay"){
 		monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationGrowthRate;
 //		monetaryFrustration += (1-ResourcesForResearch)*simulation.M.frustrationGrowthRate;
@@ -161,29 +196,26 @@ public class Researcher  {
 				if(monetaryFrustration <0.) {monetaryFrustration=0.;}
 			}	 
 		}
-			
+*/			
 	}
 
 	/**
-	 * sets Promotional frustration, works but needs randomness
+	 * sets Promotional frustration, 
 	 */
 	public void setPromotionalFrustration(){
+		int temp = getPositionInOrganization()-1;
 
 		if(simulation.M.promotionalFrustrationModel=="Academic_Age"){
-			int temp = getPositionInOrganization()-1;
 			if(getYearsInAcademia()> simulation.M.promotionalFrustrationAge[temp]){
 				promotionalFrustration += randgenerator.createRandomDouble()*simulation.M.promotionalFrustrationrate[temp];
 			}
 		}
 		if(simulation.M.promotionalFrustrationModel=="Time_in_Position"){
-			int temp = getPositionInOrganization()-1;
 			if(getYearsInPosition()> simulation.M.promotionalFrustrationAge[temp]){
 				promotionalFrustration += randgenerator.createRandomDouble()*simulation.M.promotionalFrustrationrate[temp];
 			}
 		}
-
 		if (promotionalFrustration < 0) {promotionalFrustration = 0;} //Frustration cant get negative value
-
 	}
 
 
@@ -278,9 +310,9 @@ public class Researcher  {
 	 * Set quality of application and the time used for applying
 	 * @param valintaTarkkuus
 	 */
-	public void setQualityOfApplication (double arviointiVirhe) {
+	public void setQualityOfApplication (double evaluationError) {
 		double evalError=1.;
-		timeUsedForApplying = simulation.M.oletusTutkimusAika*simulation.M.hakemisenOsuus*(1-totalFrustration);
+		timeUsedForApplying = simulation.M.defaultResearchTime*simulation.M.applyingIntensity*(1-totalFrustration);
 		if(simulation.M.applicationQualityModel=="Skill"){
 			qualityOfApplication = (researchSkill); 			
 		}
@@ -294,30 +326,30 @@ public class Researcher  {
 			qualityOfApplication =(researchSkill + Math.sqrt(timeUsedForApplying)*applyingSkill);
 		}
 		if(simulation.M.applicationQualityModel=="CombinedNormalized"){
-			qualityOfApplication= (simulation.M.aq1*researchSkill + (1-simulation.M.aq1)*applyingSkill*(1-totalFrustration));
+			qualityOfApplication= (simulation.M.resSkillWeight*researchSkill + (1-simulation.M.resSkillWeight)*applyingSkill*(1-totalFrustration));
 		}
 		
 		if(simulation.M.evaluationErrorModel=="Mult")
 		{
-			evalError=(1.+randgenerator.createNormalDistributedValue(0, arviointiVirhe));
+			evalError=(1.+randgenerator.createNormalDistributedValue(0, evaluationError));
 			qualityOfApplication = qualityOfApplication*evalError;
 
 		}
 		if(simulation.M.evaluationErrorModel=="Sum")
 		{
-			evalError=(1.+randgenerator.createNormalDistributedValue(0, arviointiVirhe));
+			evalError=(1.+randgenerator.createNormalDistributedValue(0, evaluationError));
 			qualityOfApplication+=evalError;
 		}
 		if(simulation.M.evaluationErrorModel=="Blended")
 		{
 //			qualityOfApplication=(1.-arviointiVirhe)*qualityOfApplication+arviointiVirhe*randgenerator.nextDouble(0.1, 1.);
-			qualityOfApplication=(1.-arviointiVirhe)*qualityOfApplication+arviointiVirhe*randgenerator.createLogDistributedRandomValue(0,simulation.M.researchSkillParameter);
+			qualityOfApplication=(1.-evaluationError)*qualityOfApplication+evaluationError*randgenerator.createLogDistributedRandomValue(0,simulation.M.researchSkillParameter);
 		}
 	}
 
 	public void setTimeForResearch() {
 
-		timeAvailableForResearch = simulation.M.oletusTutkimusAika+ResourcesForResearch-timeUsedForApplying;
+		timeAvailableForResearch = simulation.M.defaultResearchTime+ResourcesForResearch-timeUsedForApplying;
 	}
 
 

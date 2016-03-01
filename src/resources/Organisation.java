@@ -38,7 +38,6 @@ public class Organisation {
 	int totalPapers;
 	int year;
 	String promotionModel;
-//	private int papersFromRemovedResearchers;
 	public int citationsFromRemovedResearchers;
 	public int papersFromRemovedResearchers;
 	public int[] ResearchersByLevels= new int[4];
@@ -73,23 +72,18 @@ public class Organisation {
 	public void initialize()
 	{
 	for(int i=0; i<4;i++){
- 	PositionLevels[i] = simulation.M.PositionLevels[i];
-	sackingAge[i] = simulation.M.sackingAge[i];
+		PositionLevels[i] = simulation.M.PositionLevels[i];
+		sackingAge[i] = simulation.M.sackingAge[i];
 	}
 	promotionTreshold= simulation.M.promotionTreshold;
 	PopulationSize = simulation.M.PopulationSize;
 	sackingResistance = simulation.M.sackingResistance;
 	promotionModel = simulation.M.promotionModel;
 
-	
-	
-// Initialize a researcher array (with random research skills and right amount of  instances to each level
-	for (int i=0; i<4;i++)
-	{
-		
-		for (int j=0; j<main.simulation.M.PositionLevels[i];j++)
-		{
-		researcherArray.add(new Researcher(RandomGenerator.nextSessionId() , 0, main.simulation.randomGenerator.createResSkill(), main.simulation.randomGenerator.createSkill(), 0, 0, i+1));	
+	// Initialize a researcher array (with random research skills and right amount of  instances to each level
+	for (int i=0; i<4;i++){		
+		for (int j=0; j<main.simulation.M.PositionLevels[i];j++){
+			researcherArray.add(new Researcher(RandomGenerator.nextSessionId() , 0, main.simulation.randomGenerator.createResSkill(), main.simulation.randomGenerator.createSkill(), 0, 0, i+1));	
 		}
 	}
 	}
@@ -99,28 +93,28 @@ public class Organisation {
 	{
 		for (int i=0;i<4;i++) {ResignByLevels[i]=0;
 		RetirementAge[i]=0;}
-		for (Researcher ukkeli : researcherArray) 
+		for (Researcher doc : researcherArray) 
 		{
-			ukkeli.consumeMoney();	
-			ukkeli.addYear();
-			if (ukkeli.getYearsInAcademia() >= sackingAge[3] && main.simulation.randomGenerator.createRandomDouble() >= sackingResistance) 
+			doc.consumeMoney();	
+			doc.addYear();
+			if (doc.getYearsInAcademia() >= sackingAge[3] && main.simulation.randomGenerator.createRandomDouble() >= sackingResistance) 
 			{
-				ukkeli.setSackingProbability(1.);
+				doc.setSackingProbability(1.);
 			}
-			if (ukkeli.getLeavingOrganization()) 
+			if (doc.getLeavingOrganization()) 
 				{ 
-				TempResearchersToBeRemoved.add(ukkeli); 
-				ResignByLevels[ukkeli.getPositionInOrganization()-1]++;
-				RetirementAge[ukkeli.getPositionInOrganization()-1]+=ukkeli.getYearsInAcademia();
+				TempResearchersToBeRemoved.add(doc); 
+				ResignByLevels[doc.getPositionInOrganization()-1]++;
+				RetirementAge[doc.getPositionInOrganization()-1]+=doc.getYearsInAcademia();
 				}		
 		}
-		for (Researcher ukkeli: TempResearchersToBeRemoved)
+		for (Researcher doc: TempResearchersToBeRemoved)
 		{
-			for(Paper lappu: ukkeli.papers)
+			for(Paper article: doc.papers)
 			{
-				oldPapers.add(lappu); //kerätään talteen
+				oldPapers.add(article); // collect for bibliometric statistics
 			}
-			researcherArray.remove(ukkeli);
+			researcherArray.remove(doc);
 		}
 		TempResearchersToBeRemoved.clear();
 	}
@@ -135,13 +129,13 @@ public class Organisation {
 		SkillByLevels[i]=0.;
 		FrustrationByLevels[i]=0.;
 	}
-	for (Researcher ukkeli : researcherArray) 
+	for (Researcher doc : researcherArray) 
 	{
-		ResearchersByLevels[ukkeli.getPositionInOrganization()-1]++;	
-		PapersByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getPapers();	
-		CitationsByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getCitations();	
-		SkillByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getResearchSkill();
-		FrustrationByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getFrustration();
+		ResearchersByLevels[doc.getPositionInOrganization()-1]++;	
+		PapersByLevels[doc.getPositionInOrganization()-1]+=doc.getPapers();	
+		CitationsByLevels[doc.getPositionInOrganization()-1]+=doc.getCitations();	
+		SkillByLevels[doc.getPositionInOrganization()-1]+=doc.getResearchSkill();
+		FrustrationByLevels[doc.getPositionInOrganization()-1]+=doc.getFrustration();
 	}
 	}
 
@@ -155,7 +149,7 @@ public class Organisation {
 		}
 	}
 	
-	public void TTpromote() {
+	public void promote() {
 
 		double[] citationaverage = new double[4]; 
 		CountByLevels();
@@ -164,42 +158,26 @@ public class Organisation {
 			PromoteByLevels[i]=0;
 			PromotionAge[i]=0;
 		}
-		for(Researcher dude : researcherArray) {
-			int i= dude.getPositionInOrganization();
-			if (promotionModel=="Citation_based"&& dude.getYearsInAcademia() >= sackingAge[i-1] && (dude.getCitations() >= promotionTreshold*citationaverage[i-1])) 
+		for(Researcher doc : researcherArray) {
+			int i= doc.getPositionInOrganization();
+			if (promotionModel=="Citation_based"&& doc.getYearsInAcademia() >= sackingAge[i-1] && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
 				{
-				dude.setPositionInOrganization(i+1);
+				doc.setPositionInOrganization(i+1);
 				PromoteByLevels[i-1]++;
-				PromotionAge[i-1]+=dude.getYearsInAcademia();
+				PromotionAge[i-1]+=doc.getYearsInAcademia();
 				}
 		}				
 
 		
-/*		
-		if(promotionModel=="Citation_based"){
-			
-			for (int i=3;i>0; i--)
-			{
-					for(Researcher dude : researcherArray) {
-					if (dude.getPositionInOrganization() == i &&  dude.getYearsInAcademia() >= sackingAge[i-1] && (dude.getCitations() >= promotionTreshold*citationaverage[i-1])) 
-					{
-						dude.setPositionInOrganization(i+1);
-						PromoteByLevels[i-1]++;
-						PromotionAge[i-1]+=dude.getYearsInAcademia();
-					}
-				}				
-			}			
-		}
-		*/
 		if(promotionModel=="Position_based"){
 			for (int i=3;i>0; i--)
 			{
-					for(Researcher dude : researcherArray) {
-					if (dude.getPositionInOrganization() == i &&  dude.getYearsInPosition() >= sackingAge[i-1] && (dude.getCitations() >= promotionTreshold*citationaverage[i-1])) 
+					for(Researcher doc : researcherArray) {
+					if (doc.getPositionInOrganization() == i &&  doc.getYearsInPosition() >= sackingAge[i-1] && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
 					{
-						dude.setPositionInOrganization(i+1);
+						doc.setPositionInOrganization(i+1);
 						PromoteByLevels[i-1]++;
-						PromotionAge[i-1]+=dude.getYearsInAcademia();
+						PromotionAge[i-1]+=doc.getYearsInAcademia();
 					}
 				}				
 			}			
@@ -209,12 +187,12 @@ public class Organisation {
 
 			for (int i=3;i>0; i--)
 			{
-					for(Researcher dude : researcherArray) {
-					if (dude.getPositionInOrganization() == i && (dude.getCitations() >= promotionTreshold*citationaverage[i-1])) 
+					for(Researcher doc : researcherArray) {
+					if (doc.getPositionInOrganization() == i && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
 					{
-						dude.setPositionInOrganization(i+1);
+						doc.setPositionInOrganization(i+1);
 						PromoteByLevels[i-1]++;
-						PromotionAge[i-1]+=dude.getYearsInAcademia();
+						PromotionAge[i-1]+=doc.getYearsInAcademia();
 					}
 				}			
 			}
@@ -226,8 +204,8 @@ public class Organisation {
 			int ii=3;
 			int jj=0;
 			
-			for(Researcher dude : researcherArray) {
-				if(dude.getPositionInOrganization() < ii) {
+			for(Researcher doc : researcherArray) {
+				if(doc.getPositionInOrganization() < ii) {
 					if(jj< PromoteByLevels[ii]) {
 						System.out.println(jj+" "+PromoteByLevels[ii]);
 						PromoteByLevels[ii]=jj;
@@ -236,11 +214,11 @@ public class Organisation {
 					ii--;
 					jj=0;
 				}
-				if(dude.getPositionInOrganization() == ii && jj < PromoteByLevels[ii])
+				if(doc.getPositionInOrganization() == ii && jj < PromoteByLevels[ii])
 				{
-					dude.setPositionInOrganization(ii+1);
+					doc.setPositionInOrganization(ii+1);
 					jj++;
-					PromotionAge[ii-1]+=dude.getYearsInAcademia();
+					PromotionAge[ii-1]+=doc.getYearsInAcademia();
 				}
 			}
 			for (int i=0; i<3; i++){
@@ -252,7 +230,7 @@ public class Organisation {
 		
 
 
-public void publishTT(int currentYear) {
+public void publish(int currentYear) {
 	
 	for (int i=0;i<4;i++)
 	{
@@ -265,13 +243,13 @@ public void publishTT(int currentYear) {
 		
 		citationsFromRemovedResearchers=0;	
 		papersFromRemovedResearchers=0;
-		for(Paper lappu:oldPapers) {
-			citationsFromRemovedResearchers+=lappu.updateCitationsTT(currentYear);
+		for(Paper article:oldPapers) {
+			citationsFromRemovedResearchers+=article.updateCitationsTT(currentYear);
 			papersFromRemovedResearchers++;
-			if(lappu.isDead()) {removedPapers.add(lappu);}
+			if(article.isDead()) {removedPapers.add(article);}
 		}
-		for(Paper lappu:removedPapers) {
-			oldPapers.remove(lappu);
+		for(Paper article:removedPapers) {
+			oldPapers.remove(article);
 		}
 		removedPapers.clear();
 	}
@@ -287,16 +265,16 @@ public void publishTT(int currentYear) {
 	
 	public int getTotalCitations() {
 		totalCitations = 0;
-		for (Researcher dude : researcherArray) {
-			totalCitations += dude.getCitations();
+		for (Researcher doc : researcherArray) {
+			totalCitations += doc.getCitations();
 		}
 		return totalCitations;
 	}
 
 	public int getTotalPapers() {
 		totalPapers = 0;
-		for (Researcher dude : researcherArray) {
-			totalPapers += dude.getPapers();
+		for (Researcher doc : researcherArray) {
+			totalPapers += doc.getPapers();
 		}
 		return totalPapers;
 	}

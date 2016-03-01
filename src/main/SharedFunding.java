@@ -7,33 +7,32 @@ import java.util.Comparator;
 import resources.Researcher;
 
 public class SharedFunding {
-    double varmaFunding;
+    double securedFunding;
     double funding;
     
     public SharedFunding(){
         
     }
     
-    public double jaaRahaa(double haluttu) {
+    public double giveGrant(double wantedAmount) {
         
-        double palautettavaa = 0;
+        double grantSize = 0;
         
-        if (funding >= haluttu) {
-        funding -= haluttu;
-        palautettavaa = haluttu;
+        if (funding >= wantedAmount) {
+        funding -= wantedAmount;
+        grantSize = wantedAmount;
         }
         else {
-            palautettavaa = funding;
+            grantSize = funding;
             funding = 0;
         }
-   //     System.out.println(palautettavaa);
-        return palautettavaa;   
+        return grantSize;   
     }
 
     public void setFunds(Researcher researcher, double amount) {
     	researcher.consumeMoney();
     	amount = researcher.getResourcesNeededToBeMotivated()-researcher.ResourcesForResearch;
-    	researcher.setMoney(jaaRahaa(amount)+varmaFunding);        
+    	researcher.setMoney(giveGrant(amount)+securedFunding);        
     }
 
     public void setFunds(double d) {
@@ -52,14 +51,14 @@ public class SharedFunding {
 			}
 		};
 		int[] headcount=new int[4];
-		double nettoTutkimusResurssit = (1-simulation.M.overhead)*simulation.M.maksimiTutkimusResurssi*simulation.M.AllocatableResource; 		
-		double varmatTutkimusResurssit = nettoTutkimusResurssit*simulation.M.kuinkaPaljonJaetaanTasan; 
-		double varmatTutkimusResurssitPerTutkija = varmatTutkimusResurssit/simulation.O.researcherArray.size();
-		varmaFunding = varmatTutkimusResurssitPerTutkija;
+		double netResources = (1-simulation.M.overhead)*simulation.M.maximumResearchEffort*simulation.M.AllocatableResource; 		
+		double securedResources = netResources*simulation.M.evenlyDistributedPart; 
+		double securedFundingLevel = securedResources/simulation.O.researcherArray.size();
+		securedFunding = securedFundingLevel;
 		for(int i=0; i<4; i++) { headcount[i]=0;}
 		
 		for (Researcher researcher: simulation.O.researcherArray) {
-			researcher.setQualityOfApplication(simulation.M.arviointiVirhe);
+			researcher.setQualityOfApplication(simulation.M.evaluationError);
 			headcount[researcher.getPositionInOrganization()-1]++;
 		}
 
@@ -67,12 +66,12 @@ public class SharedFunding {
 		Collections.reverse(simulation.O.researcherArray);
 		int ii=0;
 		for(int i=4; i>0; i--) {
-			funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*headcount[i-1]/simulation.M.PopulationSize; 
+			funding =(netResources-securedResources)*headcount[i-1]/simulation.M.PopulationSize; 
 			int iii=ii+headcount[i-1];	
 			for (Researcher researcher: simulation.O.researcherArray.subList(ii, iii)) {
-				researcher.setResourcesNeededToBeMotivated(simulation.M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-				researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-				setFunds(researcher, simulation.M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
+				researcher.setResourcesNeededToBeMotivated(simulation.M.desiredResearchEffort);
+				researcher.setMoney(securedFundingLevel); 
+				setFunds(researcher, simulation.M.desiredResearchEffort-securedFundingLevel);
 				researcher.setTimeForResearch();
 			}
 			ii=iii;

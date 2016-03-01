@@ -13,6 +13,28 @@ public class Paper {
 	 */
 	public Paper(double m, double beta, double skill, int creatingYear, double immediacy, double longevity){
 
+		this.m = m;
+		this.beta = beta;
+		this.fitness = skill;
+		this.creatingYear = creatingYear;
+		this.immediacy = immediacy;
+		this.longevity = longevity;
+		
+		switch(simulation.M.paperQualityModel) {
+		case("Skill_based"): {
+			this.fitness=skill;	
+			break;
+		}
+		case("Random_Skill_based"):{
+			this.fitness= skill*simulation.randomGenerator.createLogDistributedRandomValue(0.0,simulation.M.paperQualityParameter);		
+			break;
+		}
+		case("Skill_based_Random_m"): {
+			this.m=m*simulation.randomGenerator.createLogDistributedRandomValue(0.0, 0.5);
+			break;
+		}
+		}
+/*		
 		if(simulation.M.paperQualityModel=="Skill_based"){
 				this.fitness=skill;
 			}				
@@ -22,12 +44,7 @@ public class Paper {
 		if(simulation.M.paperQualityModel=="Skill_based_Random_m"){
 				this.m=m*simulation.randomGenerator.createLogDistributedRandomValue(0.0, 0.5);
 			}						
-		this.m = m;
-		this.beta = beta;
-		this.fitness = skill;
-		this.creatingYear = creatingYear;
-		this.immediacy = immediacy;
-		this.longevity = longevity;
+*/
 	}
 
 	Paper() {
