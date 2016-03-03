@@ -1,96 +1,133 @@
 package resources;
 
 public class Model {
-	public String dir="C:/MyTemp/tmp/fundingfun/results/";
-	public String totalfile=dir+"totalfile.txt";
-	public String datafile = dir+"datafile.txt";
-	public String logfile=dir+"logfile.txt";
-	public String caseheader ="Case";
-	public String instanssi;
-	public String narrative;
-//simulation related parameters	
-	public String allocationScheme;
-	public String evaluationErrorModel;
-	public double evaluationError=0.;
-	public double overhead = 0; // 0 - 1
-	public double evenlyDistributedPart=0.;
-	public double maximumResearchEffort =1.;
-	public double desiredResearchEffort=1.;
-	public int PopulationSize = 100;
-	public int[] PositionLevels = new int[4];
-	public double AllocatableResource;
-	public double averageResource;
-	public String promotionModel;
-	public double promotionTreshold;
-	public String publishingModel;
-	public double publishingScale;
-	public double publishingOffset;
-	public double productivityCoefficient=0.;
-	public String paperQualityModel;
+/*	
+	getPropertyValues modelConfig = new getPropertyValues(simulation.modelFile);
+	getPropertyValues experimentConfig = new getPropertyValues(simulation.experimentFile);
+*/
+	// filesystem related	
+/*
+ * 		public String dir=experimentConfig.prop.getProperty("workingdirectory",".");	
+ */
+		public String dir="C:/MyTemp/tmp/fundingfun/results/";
+		public String totalfile=dir+"totalfile.txt";
+		public String datafile = dir+"datafile.txt";
+		public String logfile=dir+"logfile.txt";
+		public String modelfile;
+	// simulation execution
+		public long researcherSeed= 0L;
+		public long paperSeed = 0L;
+		public int warmUp = 200;
+		public int repetitionCount = 10;
+		public int runLength = 200;
+		public int safetyDistance = 50;
 
-// researcher related parameters
-	public double defaultResearchTime =0;
-	public double neededToBeMotivated= 1; //pidet‰‰n vakiona (k‰ytet‰‰n vain konstruktorissa nyt)
-	public double applyingIntensity=0.5;
-	public double defaultMonetaryFrustration = 0;
-	public String monetaryFrustrationModel;
-	public double frustrationGrowthRate =0.1;
-	public double[] frustrationRate = new double[4];
-	public double secondaryFrustrationRate= 0.2;
-	public double defaultPromotionalFrustration = 0;
-	public String promotionalFrustrationModel;
-	public int[] promotionalFrustrationAge = new int[4];
-	public int[] sackingAge = new int[4];
-	public double[] promotionalFrustrationrate = new double[4];
-	public double sackingResistance=0.8;
-	public double monetaryFrustrationWeight;
-	public double promotionalFrustrationWeight;
-	public String productivityModel;
-	public double frustrationProductivityWeight;
-	public double monetaryProductivityWeight;
-	public String applicationQualityModel;
-	public double resSkillWeight=1.;
+	// organisation related
+		public int PopulationSize = 100;
+		public int levelCount=4;
+		public int[] PositionLevels = new int[8];
+		public String promotionModel;
+		public double promotionTreshold;
+		public int[] sackingAge = new int[8];
+
+	// funding related
+		public String allocationScheme;
+		public String evaluationErrorModel;
+		public double evaluationError=0.;
+		public double overhead = 0; // 0 - 1
+		public double evenlyDistributedPart=0.;
+		public double maximumResearchEffort =1.;//fix
+		public double defaultResearchShare =0;
+		public double desiredResearchEffort=1.; //fix 
+		public double resourceLevel =.5;// strictly more than 0
+		public double AllocatableResource; //computed
+		public double averageResource; //computed
+		public double defaultResearchTime; //computed
+
+	//publishing related parameters	
+		public String publishingModel;
+		public double publishingScale; //computed
+		public double publishingOffset; //is it needed?
+		public double productivityCoefficient=0.;
+		public String paperQualityModel;
+		public String citationModel; // for Paper
+		public double paperQualityParameter;
+		
+
+	// researcher related parameters
+
+		public double neededToBeMotivated= 1; //pidet‰‰n vakiona (k‰ytet‰‰n vain konstruktorissa nyt)
+		public double applyingIntensity=0.5;
+		public double defaultMonetaryFrustration = 0;
+		public String monetaryFrustrationModel;
+		public double frustrationGrowthRate =0.1;
+		public double[] frustrationRate = new double[8];
+		public double secondaryFrustrationRate= 0.2;
+		public double defaultPromotionalFrustration = 0;
+		public String promotionalFrustrationModel;
+		public int[] promotionalFrustrationAge = new int[8];
+		public double[] promotionalFrustrationrate = new double[8];
+		public double sackingResistance=0.8;
+		public double monetaryFrustrationWeight;
+		public double promotionalFrustrationWeight;
+		public String productivityModel;
+		public double frustrationProductivityWeight;
+		public double monetaryProductivityWeight;
+		public String applicationQualityModel;
+		public double resSkillWeight=1.;
+		
+		
+		public String skillModel; // for random generators
+		public double skillParameter;
+		public String researchSkillModel;
+		public double fitnessVariance;
+		public double fitnessSkillFactor;
+		public double researchSkillParameter;
+
+
+		public String caseheader ="Case"; //depends on design
+		public String instanssi; //computed by experiment
+		public String narrative; //computed 
+
 	
-	public String citationModel; // for Paper
-	
-	public String skillModel; // for random generators
-	public double skillParameter;
-	public String researchSkillModel;
-	public double fitnessVariance;
-	public double fitnessSkillFactor;
-	public double researchSkillParameter;
-	public double paperQualityParameter;
-
-
-
+		
 	public void resetGrant(){
-		double resourceLevel =.5;// strictly more than 0
-		PopulationSize = 100;
-		maximumResearchEffort = 1; 
+		// organisation related
+		levelCount=4;
 		PositionLevels[0] = 25; PositionLevels[1]=25; PositionLevels[2]=25; PositionLevels[3]=25;
+		PopulationSize = 0;
+		for (int i=0; i<levelCount; i++) {PopulationSize+=PositionLevels[i];}
+		promotionModel = "Position_based";
+		promotionTreshold = 1.5; //1. = average performance
+		sackingAge[0]=4;
+		sackingAge[1]=4;
+		sackingAge[2]=8;
+		sackingAge[3]=32;
+		sackingResistance=0.75;	
+	// funding related
 		allocationScheme="Grant";
-		defaultResearchTime=0.*resourceLevel;
-		AllocatableResource = PopulationSize*(resourceLevel-defaultResearchTime);
-		publishingScale=1./resourceLevel; 
-		averageResource=AllocatableResource/PopulationSize;
-		desiredResearchEffort = 1-defaultResearchTime;	
-
-		evenlyDistributedPart = 0; //0 -1
-		overhead = 0; // 0 - 100%
-
-		publishingModel="Flatrate";
-		productivityCoefficient=0.5;
-		publishingOffset=1.;
-
 		evaluationErrorModel="Blended"; 
 		evaluationError=0.;
+		overhead = 0; // 0 - 100%
+		evenlyDistributedPart = 0; //0 -1
+		maximumResearchEffort = 1; //fixed
+		resourceLevel=0.5; 
+		defaultResearchShare=0.;
+		defaultResearchTime=defaultResearchShare*resourceLevel;
+		AllocatableResource = PopulationSize*resourceLevel*(1-defaultResearchShare);
+		averageResource=AllocatableResource/PopulationSize;
+		desiredResearchEffort = 1-defaultResearchTime;	
+	//publishing related parameters	
+		publishingModel="Flatrate";
+		publishingScale=1./resourceLevel; 
+		productivityCoefficient=0.5;
+		publishingOffset=1.; //needed?
 		paperQualityModel = "Random_Skill_based";
+		citationModel="WangPoisson";
 
 	// researcher related parameters
 		applyingIntensity=0.; // hakemisen aika osuutena oletustutkimusajasta 
-		
 		defaultMonetaryFrustration = 0;
-//		monetaryFrustrationModel="Scaled";
 		monetaryFrustrationModel="Tuned";
 		frustrationGrowthRate =0.05/(1-averageResource/desiredResearchEffort);
 		frustrationRate[0]=0.08/(1-averageResource/desiredResearchEffort);
@@ -98,47 +135,34 @@ public class Model {
 		frustrationRate[2]=0.05/(1-averageResource/desiredResearchEffort);
 		frustrationRate[3]=0.05/(1-averageResource/desiredResearchEffort);
 		secondaryFrustrationRate=0.0;
-
-//		promotionModel = "Citation_based";
-		promotionModel = "Position_based";
-		promotionTreshold = 1.5; //1. = average performance
-		sackingAge[0]=4;
-		sackingAge[1]=4;
-		sackingAge[2]=8;
-		sackingAge[3]=32;
-		sackingResistance=0.75;
-
 		defaultPromotionalFrustration = 0;		
 		promotionalFrustrationModel="Time_in_Position";
 		promotionalFrustrationAge[0] = 4;
 		promotionalFrustrationAge[1] = 4;
 		promotionalFrustrationAge[2] = 8;
 		promotionalFrustrationAge[3] = 33;
-		promotionalFrustrationrate[0] = 0.2; //k‰yt‰nnˆss‰ puolet tahdista toteutuu
+		promotionalFrustrationrate[0] = 0.2; 
 		promotionalFrustrationrate[1] = 0.2;
 		promotionalFrustrationrate[2] = 0.1;
 		promotionalFrustrationrate[3] = 0.0;
-
 		monetaryFrustrationWeight=1.0;
 		promotionalFrustrationWeight=1.0;
-
+		sackingResistance=0.8;
 		productivityModel="Summative";
 		frustrationProductivityWeight=1.;
-		monetaryProductivityWeight=0.0; //no monetary productivity
-
+		monetaryProductivityWeight=0.0; 
 		applicationQualityModel="CombinedNormalized";
 		resSkillWeight=1.;
-		
-		citationModel="WangPoisson";
-		
+			
+			
 		researchSkillModel="LogNormal";
 		fitnessVariance=0.5*0.5;
 		fitnessSkillFactor=0.5;
-		researchSkillParameter=Math.sqrt(fitnessVariance*fitnessSkillFactor);// 0.2 + random kerroin Tuomaksella
+		researchSkillParameter=Math.sqrt(fitnessVariance*fitnessSkillFactor);
 		paperQualityParameter=Math.sqrt(fitnessVariance*(1-fitnessSkillFactor));
 		skillModel="LogNormal"; // for random generators
-		skillParameter=researchSkillParameter; //sama jakauma molemmille taidoille
-	
+		skillParameter=researchSkillParameter; 
+
 	}
 
 	
