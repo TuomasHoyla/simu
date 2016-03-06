@@ -141,8 +141,9 @@ mon.logNarrative();
 		/**
 		 * Simulation itself added to comments for now, fileread example above
 		 */
-			simulation test = new simulation();
-			test.simulate();
+			System.out.println(randomGenerator.createNormalDistributedValue());
+			//simulation test = new simulation();
+			//test.simulate();
 		
 	}
 

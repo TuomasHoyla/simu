@@ -5,21 +5,35 @@ import java.util.Random;
 import main.*;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
-
-
 
 public class RandomGenerator {
-	Random randgenerator = new Random();
-	private static SecureRandom random = new SecureRandom();
+	
+	private Random randgenerator;
+	private static SecureRandom random;
 //	PoissonDistribution papergenerator = new PoissonDistribution(0.1);
-	private NormalDistribution Ndf = new NormalDistribution();
+	private NormalDistribution Ndf;
 	static double r;
+	
+	public RandomGenerator() {
+		
+		randgenerator = new Random();
+		random = new SecureRandom();
+		Ndf = new NormalDistribution();
+		
+	}
+	
+	public RandomGenerator(long seed) {
+		
+		randgenerator = new Random(seed);
+		random = new SecureRandom();
+		Ndf = new NormalDistribution();
+		
+	}
+	
 
 
 	public double createRandomDouble() {
-		r =randgenerator.nextDouble();
-		return r;
+		return randgenerator.nextDouble();
 	}
 
 	public double createNormalDistributedValue(double mean, double sDeviation) {
