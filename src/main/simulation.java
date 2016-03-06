@@ -2,43 +2,37 @@ package main;
 
 /** TODO
  * 
- * - simulointi-luokkaa pitänee faktoroida niin, että irrotetaan organisaatioon liittyvät osat (organisaatiokohtainen tutkijapooli, rekrytointi ja promootiomekanismit jne) omaksi luokakseen, mikä mahdollistaisi jatkossa useamman organisaation simuloinnin ja jättäisi simulointiluokan vastaamaan kokonaisuuden rakenteesta ja simulointikokeen ajamisesta
-- Model luokan sisällöistä irrotetaan osa experiment-luokaksi (koekaavion hallinta ja mallin muokkaus faktori faktorilta, toistojen määrät yms, syöttö ja tulostiedostot
-- mallin sisällölliset luokat (kuten Researcher, paper uusi organisation luokka) kirjoitetaan takaisin käyttämään sisäisiä muuttujia (Model-luokan muuttujien sijaan) ja lisätään config tms metodi, joka alustaa sisäiset vakiot/parametrit Model-luokan pohjalta. Tällöin Model-luokkaan tehtävät viittaukset voivat olla tarvittaessa epäsuorempia. mahdollisesti sisältöluokat vastaisivat omasta tiedon monitoroinnistaan.
+ * - simulointi-luokkaa pitï¿½nee faktoroida niin, ettï¿½ irrotetaan organisaatioon liittyvï¿½t osat (organisaatiokohtainen tutkijapooli, rekrytointi ja promootiomekanismit jne) omaksi luokakseen, mikï¿½ mahdollistaisi jatkossa useamman organisaation simuloinnin ja jï¿½ttï¿½isi simulointiluokan vastaamaan kokonaisuuden rakenteesta ja simulointikokeen ajamisesta
+- Model luokan sisï¿½llï¿½istï¿½ irrotetaan osa experiment-luokaksi (koekaavion hallinta ja mallin muokkaus faktori faktorilta, toistojen mï¿½ï¿½rï¿½t yms, syï¿½ttï¿½ ja tulostiedostot
+- mallin sisï¿½llï¿½lliset luokat (kuten Researcher, paper uusi organisation luokka) kirjoitetaan takaisin kï¿½yttï¿½mï¿½ï¿½n sisï¿½isiï¿½ muuttujia (Model-luokan muuttujien sijaan) ja lisï¿½tï¿½ï¿½n config tms metodi, joka alustaa sisï¿½iset vakiot/parametrit Model-luokan pohjalta. Tï¿½llï¿½in Model-luokkaan tehtï¿½vï¿½t viittaukset voivat olla tarvittaessa epï¿½suorempia. mahdollisesti sisï¿½ltï¿½luokat vastaisivat omasta tiedon monitoroinnistaan.
 
 Kokonaiskuva olisi jotain seuraavan kaltaista:
-- luetaan "experiment_config" -tiedosto, joka määrittelee simuloinnin keston, toistot, mittauspisteet sekä koekaavion (faktorit, tasot) ja mallin oletuskonfiguraation tiedoston ja tulostiedostot kuvausteksteineen
+- luetaan "experiment_config" -tiedosto, joka mï¿½ï¿½rittelee simuloinnin keston, toistot, mittauspisteet sekï¿½ koekaavion (faktorit, tasot) ja mallin oletuskonfiguraation tiedoston ja tulostiedostot kuvausteksteineen
 - luetaan mallin oletuskonfi (parametrien nimi + arvoparit)
 - parseroidaan koekaavio ja jokaiselle tunnistetulle kokeelle
 -- alustetaan malli oletusarvoon
 -- konfataan malli a.o. kokeen faktorien mukaan
--- alustetaan mallin sisältöluokat konfatun mallin mukaiseksi ja tulosmonitorit koesuunnitelman mukaisiksi
--- simuloidaan koepisteen malliversio määritellyin toistoin
+-- alustetaan mallin sisï¿½ltï¿½luokat konfatun mallin mukaiseksi ja tulosmonitorit koesuunnitelman mukaisiksi
+-- simuloidaan koepisteen malliversio mï¿½ï¿½ritellyin toistoin
 -- tallennetaan tulokset
 
-Ainakin itsestäni tuo ylläkuvattu vaikuttaa pääosin suoraviivaiselta. Omat Java-taitoni tällä hetkellä ylittäviä osuuksia ovat
+Ainakin itsestï¿½ni tuo yllï¿½kuvattu vaikuttaa pï¿½ï¿½osin suoraviivaiselta. Omat Java-taitoni tï¿½llï¿½ hetkellï¿½ ylittï¿½viï¿½ osuuksia ovat
 - robusti tietojen luku
 
-- mallin virkarakenteen yleistäminen (nyt hard-koodattu neljä tasoa mutta n-tasoa olisi joustavampi). 
-En aikanaan onnistunut tekemään tutkijalistoista taulukkoa, jolloin saisi luupattua yli tasokohtaisten 
-listojen ja voisi pitää eri tasojen kohortit erillisinä
+- mallin virkarakenteen yleistï¿½minen (nyt hard-koodattu neljï¿½ tasoa mutta n-tasoa olisi joustavampi). 
+En aikanaan onnistunut tekemï¿½ï¿½n tutkijalistoista taulukkoa, jolloin saisi luupattua yli tasokohtaisten 
+listojen ja voisi pitï¿½ï¿½ eri tasojen kohortit erillisinï¿½
 
 - 2-k kokeen konfaus (tiedostosta luettavalle faktorilistalle ja k:n arvolle) 
-(edellyttänee jonkin tyyppistä rekursiota, jos k ei ole kiinteä) 
-[käytännössä experiment konfi voisi sisältää koekaavion tyyliin
-faktori; tasojen määrä; arvo1; arvo2; jne]
+(edellyttï¿½nee jonkin tyyppistï¿½ rekursiota, jos k ei ole kiinteï¿½) 
+[kï¿½ytï¿½nnï¿½ssï¿½ experiment konfi voisi sisï¿½ltï¿½ï¿½ koekaavion tyyliin
+faktori; tasojen mï¿½ï¿½rï¿½; arvo1; arvo2; jne]
  * 
  */
 
 
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
 import resources.*;
-import configreader.getPropertyValues;
 
 public class simulation {
 	
