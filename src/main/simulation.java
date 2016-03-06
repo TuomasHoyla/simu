@@ -32,6 +32,8 @@ faktori; tasojen m��r�; arvo1; arvo2; jne]
 
 
 import java.text.DecimalFormat;
+
+import configreader.getPropertyValues;
 import resources.*;
 
 public class simulation {
@@ -46,8 +48,16 @@ public class simulation {
 
 	int year;
 
+	//Default constructor
+	public simulation() {
+		// TODO use default simulation configuration
+	}
 
-
+	//Constructor if file exists
+	public simulation(String referenceStateFile, String experimentFile) {
+		// TODO read files
+		getPropertyValues configfile = new getPropertyValues(referenceStateFile); //lacks other file as a parameter
+	}
 	public void iterate (int count){
 		for (int loop=0; loop< count; loop++) 
 		{
@@ -118,9 +128,31 @@ mon.logNarrative();
 	
 
 	/** This is the main method for simulation 
-	 * @param args
+	 * @param args referenceStateFile, experimentFile
 	 */
 	public static void main(String[] args) {
+		
+		simulation test = null;
+		
+		/**
+		 * Tries parameters. Runs as .jar as follows: "java -jar simulation.jar file1.conf file2.conf"
+		 */
+	    try {
+	    	
+	    	test = new simulation(args[0], args[1]);
+	    	
+	    }
+	    catch (ArrayIndexOutOfBoundsException e){
+	    	
+	        System.out.println("ArrayIndexOutOfBoundsException caught: " + e + " no simulation setting file parameters given, using defaults");
+	        
+	        test = new simulation();
+	    }
+	    finally {
+	    	
+	    	test.simulate();
+	    }
+	    
 
 		/*
 		//From package configreader
@@ -138,12 +170,7 @@ mon.logNarrative();
 		}
 		*/
 		
-		/**
-		 * Simulation itself added to comments for now, fileread example above
-		 */
-			System.out.println(randomGenerator.createNormalDistributedValue());
-			//simulation test = new simulation();
-			//test.simulate();
+
 		
 	}
 
