@@ -5,7 +5,7 @@ import main.*;
 
 public class Researcher  {
 
-	static RandomGenerator randgenerator = new RandomGenerator();
+	static RandomGenerator randgenerator = new RandomGenerator(simulation.M.researcherSeed);
 	public String name;
 	double aplTimeResources = 0;
 	private double qualityOfApplication;

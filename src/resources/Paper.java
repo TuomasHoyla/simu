@@ -1,7 +1,7 @@
 package resources;
 import main.*;
 public class Paper {
-	static RandomGenerator randGenerator = new RandomGenerator();
+	static RandomGenerator randGenerator = new RandomGenerator(simulation.M.paperSeed);
 	
 	private int citations = 0;
 	private double m, beta, fitness, immediacy, longevity;

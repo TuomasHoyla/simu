@@ -76,25 +76,26 @@ public class simulation {
 	public void simulate()  {
 /*		
 M.readExperiment(configurationfile);
-M.readModel();
+
+M.resetModel();
 mon.setHeadings();	
-for (int koe=0; koe<M.kokeet; koe++) {
-M.configure(koe);
-O.initialize ()
-mon.resetCounters();
-iterate(M.warmUp);
-			for (int sample=0; sample < M.sample; sample++)
-			{
-				mon.resetCounters();
-				iterate(M.duration); // single sample
-				mon.logReport(M.duration);
-				iterate(M.separation); //separation
-			} //end sampling
-			O.researcherArray.clear();
-			O.oldPapers.clear();
-			year = 0;
-		} //end koe
+//for (int koe=0; koe<M.; koe++) {
+	//M.configure(koe);
+	O.initialize ();
+	mon.resetCounters();
+	iterate(M.warmUp);
+	for (int sample=0; sample < M.repetitionCount; sample++){
+		mon.resetCounters();
+		iterate(M.runLength); // single sample
+		mon.logReport(M.runLength);
+		iterate(M.safetyDistance); //separation
+	} //end sampling
+	O.researcherArray.clear();
+	O.oldPapers.clear();
+	year = 0;
+//} //end koe
 mon.logNarrative();
+}
 
 */
 		M.resetGrant();
