@@ -34,30 +34,53 @@ faktori; tasojen m��r�; arvo1; arvo2; jne]
 import java.text.DecimalFormat;
 
 import configreader.getPropertyValues;
+
+import java.util.ArrayList;
+import java.util.Properties;
+
 import resources.*;
 
 public class simulation {
 	
 	public static Model M = new Model();
+	public static Modelv2 M2 = new Modelv2();
 	public static Monitor mon = new Monitor();
 	public static Organisation O = new Organisation();
 	FileRead fileread = new FileRead();
 	DecimalFormat df = new DecimalFormat("#.##");
 	SharedFunding funder = new SharedFunding();
 	public static RandomGenerator randomGenerator = new RandomGenerator();
+	public static Properties configs ;
+	public static Properties experiment;
+	public static boolean headingSet=false;
 
 	int year;
 
 	//Default constructor
 	public simulation() {
 		// TODO use default simulation configuration
+		getPropertyValues configfile = new getPropertyValues("resources/config.properties"); //lacks other file as a parameter
+		getPropertyValues experimentfile = new  getPropertyValues("resources/experiment.properties");
+		try {
+		configs = configfile.getPropValues();
+		experiment = experimentfile.getPropValues();
+		}
+		catch (Exception e) {}
 	}
 
 	//Constructor if file exists
-	public simulation(String referenceStateFile, String experimentFile) {
+	public simulation(String referenceStateFile, String expFile) {
 		// TODO read files
 		getPropertyValues configfile = new getPropertyValues(referenceStateFile); //lacks other file as a parameter
+		getPropertyValues experimentfile = new  getPropertyValues(expFile);
+		try {
+		configs = configfile.getPropValues();
+		experiment = experimentfile.getPropValues();
+		}
+		catch (Exception e) {}
 	}
+	
+	
 	public void iterate (int count){
 		for (int loop=0; loop< count; loop++) 
 		{
@@ -73,59 +96,51 @@ public class simulation {
 		}
 		
 	}
-	public void simulate()  {
-/*		
-M.readExperiment(configurationfile);
-
-M.resetModel();
-mon.setHeadings();	
-//for (int koe=0; koe<M.; koe++) {
-	//M.configure(koe);
-	O.initialize ();
-	mon.resetCounters();
-	iterate(M.warmUp);
-	for (int sample=0; sample < M.repetitionCount; sample++){
+	
+	public void runExperiment(String instance) {
+		year = 0;
+		O.initialize ();
 		mon.resetCounters();
-		iterate(M.runLength); // single sample
-		mon.logReport(M.runLength);
-		iterate(M.safetyDistance); //separation
-	} //end sampling
-	O.researcherArray.clear();
-	O.oldPapers.clear();
-	year = 0;
-//} //end koe
+		iterate(M.warmUp);
+		for (int sample=0; sample < M.repetitionCount; sample++){
+			mon.resetCounters();
+			iterate(M.runLength); // single sample
+			mon.logReport2(M.runLength, instance);
+			iterate(M.safetyDistance); //separation
+		} //end sampling
+		O.researcherArray.clear();
+		O.oldPapers.clear();
+	}
+	public void simulate()  {
+		
+
+M2.resetModel(configs);
+M2.configureExperiments(experiment);
+mon.setHeadings();	
+runFactors(M2.factorName, M2.factorValues,"");
 mon.logNarrative();
 }
 
-*/
-		M.resetGrant();
-		M.configure(0);; //to initialize the headings
-		mon.setHeadings();
-		M.setNarrative();
-		for(int koe=1; koe<13 ; koe++) 
-		{
-			M.configure(koe);
-			O.initialize();
-			mon.resetCounters();
-			iterate(100); //warm up
-			for (int sample=0; sample < 10; sample++)
-			{
-				mon.resetCounters();
-				iterate(200); // single sample
-				mon.logReport(200);
-				iterate(50); //separation
-
-			} //end sampling
-
-			O.researcherArray.clear();
-			O.oldPapers.clear();
-			year = 0;
-		} //end koe
-		mon.logNarrative();
 		
 
-	}
 
+
+	public void runFactors(ArrayList<String> fName, ArrayList<String> fValues, String instance) {
+		
+		int size = fName.size();
+		String name = fName.remove(size-1);
+		String values = fValues.remove(size-1);
+		String parsedValues[] = values.split(",");
+		for(int i=0; i< parsedValues.length; i++) {
+			M2.setFactor(name, parsedValues[i]);
+			String newInstance = instance+";"+ parsedValues[i];
+			if(size >1) {
+			runFactors(fName, fValues, newInstance);}
+			else {
+				runExperiment(newInstance);
+			}
+		}
+	}	
 	
 
 	/** This is the main method for simulation 
@@ -154,23 +169,6 @@ mon.logNarrative();
 	    	test.simulate();
 	    }
 	    
-
-		/*
-		//From package configreader
-		getPropertyValues configfile = new getPropertyValues();
-		
-		try {
-			//List all the properties
-			System.out.println(configfile.getPropValues());
-			
-			//print unique property
-			System.out.println(configfile.getPropValues().getProperty("populationsize"));
-		} catch (IOException e) {
-			System.out.println("No config found!");
-			e.printStackTrace();
-		}
-		*/
-		
 
 		
 	}

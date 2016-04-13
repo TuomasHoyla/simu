@@ -8,14 +8,12 @@ package resources;
  */
 
 
-import java.io.IOException;
-import java.text.DecimalFormat;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import resources.*;
-import configreader.getPropertyValues;
+
 import main.simulation;
 
 public class Organisation {
