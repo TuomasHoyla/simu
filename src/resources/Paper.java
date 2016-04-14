@@ -34,17 +34,6 @@ public class Paper {
 			break;
 		}
 		}
-/*		
-		if(simulation.M.paperQualityModel=="Skill_based"){
-				this.fitness=skill;
-			}				
-		if(simulation.M.paperQualityModel=="Random_Skill_based"){
-				this.fitness= skill*simulation.randomGenerator.createLogDistributedRandomValue(0.0,simulation.M.paperQualityParameter);
-			}				
-		if(simulation.M.paperQualityModel=="Skill_based_Random_m"){
-				this.m=m*simulation.randomGenerator.createLogDistributedRandomValue(0.0, 0.5);
-			}						
-*/
 	}
 
 	Paper() {
@@ -60,18 +49,18 @@ public class Paper {
 	public int updateCitationsTT(int thisYear) {
 		double temp= randGenerator.Mic(m, beta, fitness, (thisYear-getCreatingYear()), immediacy, longevity);
 		if((thisYear -getCreatingYear()) >= 1 && temp <= 0.01) {isDead=true;}
-		if(simulation.M.citationModel=="Wang"){
+/*		if(simulation.M.citationModel=="Wang"){
 			int citationsToAdd = (int) Math.rint(2*temp);
 			if (citationsToAdd >= 0) citations += citationsToAdd;
 			return citationsToAdd;
 		}
 		else if(simulation.M.citationModel=="WangPoisson"){
-			int citationsToAdd = randGenerator.createPoisson2(temp);
+*/			int citationsToAdd = randGenerator.createPoisson2(temp);
 			if (citationsToAdd >= 0) citations += citationsToAdd;
 			return citationsToAdd;
-		}
+/*		}
 		else return 0;
-	}
+*/	}
 
 	public int getCitations() {
 		return citations;

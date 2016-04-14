@@ -156,21 +156,24 @@ public class Organisation {
 			PromoteByLevels[i]=0;
 			PromotionAge[i]=0;
 		}
-		for(Researcher doc : researcherArray) {
-			int i= doc.getPositionInOrganization();
-			if (promotionModel=="Citation_based"&& doc.getYearsInAcademia() >= sackingAge[i-1] && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
-				{
-				doc.setPositionInOrganization(i+1);
-				PromoteByLevels[i-1]++;
-				PromotionAge[i-1]+=doc.getYearsInAcademia();
-				}
-		}				
-
+		switch(promotionModel) {
+		case("Citation_based"): {
+			for(Researcher doc : researcherArray) {
+				int i= doc.getPositionInOrganization();
+				if (doc.getYearsInAcademia() >= sackingAge[i-1] && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
+					{
+					doc.setPositionInOrganization(i+1);
+					PromoteByLevels[i-1]++;
+					PromotionAge[i-1]+=doc.getYearsInAcademia();
+					}
+			}				
+			break;	
+		}
 		
-		if(promotionModel=="Position_based"){
+		case("Position_based"):{
 			for (int i=3;i>0; i--)
 			{
-					for(Researcher doc : researcherArray) {
+				for(Researcher doc : researcherArray) {
 					if (doc.getPositionInOrganization() == i &&  doc.getYearsInPosition() >= sackingAge[i-1] && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
 					{
 						doc.setPositionInOrganization(i+1);
@@ -178,25 +181,24 @@ public class Organisation {
 						PromotionAge[i-1]+=doc.getYearsInAcademia();
 					}
 				}				
-			}			
+			}
+			break;
 		}
-
-		if(promotionModel=="Citation_only"){
-
-			for (int i=3;i>0; i--)
-			{
-					for(Researcher doc : researcherArray) {
-					if (doc.getPositionInOrganization() == i && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
-					{
+			
+		case("Citation_only"): {
+			for (int i=3;i>0; i--){
+				for(Researcher doc : researcherArray) {
+					if (doc.getPositionInOrganization() == i && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) {
 						doc.setPositionInOrganization(i+1);
 						PromoteByLevels[i-1]++;
 						PromotionAge[i-1]+=doc.getYearsInAcademia();
 					}
 				}			
 			}
+			break;
 		}
-
-			if(promotionModel=="Fixed_HC"){
+			
+		case("Fixed_HC"): {
 			Collections.sort(researcherArray, vertaaja2);
 			Collections.reverse(researcherArray);
 			int ii=3;
@@ -224,6 +226,16 @@ public class Organisation {
 			}
 			PromoteByLevels[3]=0;
 		}
+			
+		default: {
+			System.out.println("Organisation: promotion model "+promotionModel+" not known");
+		}
+		}
+		
+
+
+
+		
 	}
 		
 

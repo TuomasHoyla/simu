@@ -10,7 +10,6 @@ public class RandomGenerator {
 	
 	private Random randgenerator;
 	private static SecureRandom random;
-//	PoissonDistribution papergenerator = new PoissonDistribution(0.1);
 	private NormalDistribution Ndf;
 	static double r;
 	
@@ -52,11 +51,6 @@ public class RandomGenerator {
 	public static String nextSessionId(){
 		return new BigInteger(40, random).toString(32);
 	}
-/*
-	public int getSkipperNumber() {
-		return randgenerator.nextInt();
-	}
-*/
 	/**
 	 * The method will split the papers citations for more than 1 year
 	 * @param thisYear
@@ -87,82 +81,12 @@ public class RandomGenerator {
 	 * @param part array of randomly divided numbers
 	 * @return
 	 */
-	/*
-	public double[] divideUniformlyRandomly(double number, int part) {
-		double uniformRandoms[] = new double[part];
 
-		double mean = number / part;
-		double sum = 0.0;
-
-		for (int i=0; i<part / 2; i++) {
-			uniformRandoms[i] = randgenerator.nextDouble() * mean;
-			uniformRandoms[part - i - 1] = mean + randgenerator.nextDouble() * mean;
-			sum += uniformRandoms[i] + uniformRandoms[part - i -1];
-		}
-		uniformRandoms[(int)Math.ceil(part/2)] = uniformRandoms[(int)Math.ceil(part/2)] + number - sum;
-		return uniformRandoms;
-	}
-*/
-/*
-	public static double logb( double a, double b )
-	{
-		return Math.log(a) / Math.log(b);
-	}
-	*/
-/*
-	public double log1_5( double a )
-	{
-		return logb(a,1.5);
-	}
-*/	
-
-	/**
-	 * Creates exponential array for user interface
-	 * @param x
-	 * @param linear
-	 * @param curve
-	 * @return
-	 */
-	/*
-	public double fExp(double x, double linear, double curve) {
-		return Math.exp(x*linear)*curve;
-
-
-	}
-	*/
-	/**
-	 * Creates linear array for user interface
-	 * @param slope
-	 * @param x
-	 * @param Intercept
-	 * @return
-	 */
-/*	public double fLin(double slope, double x, double Intercept) {
-		return slope*x+Intercept; // mx+b
-	}
-*/
-	/**
-	 * 
-	 * @param location μ, 0
-	 * @param scale σ , 0.25
-	 * @return distributed value
-	 */
 	public double createLogDistributedRandomValue(double location, double scale) {
 		double temp= randgenerator.nextGaussian()*scale+location;
 		double value = Math.exp(temp);
 		return value;
 	}
-/*	
-	public int createPoisson(double time)
-	{
-		int temp=0;
-		for (int i=0; i< time ; i++)
-		{
-			temp+=papergenerator.sample();
-		}
-		return temp;
-	}
-	*/
 	public int createPoisson2(double s)
 	{
 		double temp= randgenerator.nextDouble();
@@ -179,15 +103,6 @@ public class RandomGenerator {
 		}
 		return 40;
 	}
-	/**
-	 * Sub-method for Mic Model to create beta value
-	 * @return random beta between 0 and 4.164, mean ~ 1
-	 */
-	/*
-	private double createBetaForMic() {
-		return createLogDistributedRandomValue(0.0, 0.29)-0.043;
-	}
-*/
 	/**
 	 * Creates a random value between given border values
 	 * @param start first number
@@ -212,14 +127,18 @@ public class RandomGenerator {
 	 */
 	public double createSkill() {
 
-		if(simulation.M.skillModel=="LogNormal") {
+//		if(simulation.M.skillModel=="LogNormal") {
 		return createLogDistributedRandomValue(0.0, simulation.M.skillParameter);
-		}
+/*		}
 		else if(simulation.M.skillModel=="LogNormalScaled") {
 			return createLogDistributedRandomValue(0.0, 0.35)/1.0637;
 		}
 			
-		else return 1.0;
+		else {
+			System.out.println("Invalid skillModel "+ simulation.M.skillModel);
+			
+			return 1.0;
+		}*/
 	}
 	
 
@@ -227,13 +146,13 @@ public class RandomGenerator {
 	public double createResSkill() {
 		
 		
-		if(simulation.M.researchSkillModel=="LogNormal") {
+//		if(simulation.M.researchSkillModel=="LogNormal") {
 			return createLogDistributedRandomValue(0, simulation.M.researchSkillParameter);
-		}
-		else {
-			System.out.println("Res skill");
-			return 1.0;
-		}
+//		}
+//		else {
+//			System.out.println("Invalid researchSkillModel |"+ simulation.M.researchSkillModel+"|");
+//			return 1.0;
+//		}
 	
 	}
 
