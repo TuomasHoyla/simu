@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class Model {
 	
-
+	private Properties prop;
 	public String dir;
 	public String totalfile;
 	public String datafile;
@@ -85,13 +85,13 @@ public class Model {
 	public String instanssi; //computed by experiment
 	public String narrative; //computed 
 	
-	public ArrayList<String> factorName = new ArrayList();
-	public ArrayList<String> factorValues = new ArrayList();
+	public ArrayList<String> factorName = new ArrayList<String>();
+	public ArrayList<String> factorValues = new ArrayList<String>();
 
 
 public void resetModel(Properties config){
 	
-	Properties prop =config;
+	prop =config;
 	try {
 		levelCount =Integer.parseInt((prop.getProperty("levelCount")));
 		String temp[] = prop.getProperty("positionLevels").split(",");
@@ -208,18 +208,28 @@ public void setFactor(String name, String value) {
  		switch(value) {
  		case("Lottery"):
  			overhead=0.;
+ 			applyingIntensity=0.;
  			evenlyDistributedPart=0.;
  			evaluationError=1.;
  			break;
  		case("Communism"):
  			overhead=0.;
  			evenlyDistributedPart=1;
+ 			applyingIntensity=0;
  			break;
  		case("Capitalism"):
+ 			overhead = Double.parseDouble(prop.getProperty("overhead"));
+			evenlyDistributedPart = Double.parseDouble(prop.getProperty("evenlyDistributedPart"));
+			evaluationError= Double.parseDouble(prop.getProperty("evaluationError"));
+			resSkillWeight= Double.parseDouble(prop.getProperty("resSkillWeight"));
+			applyingIntensity=Double.parseDouble(prop.getProperty("applyingIntensity"));
+			break;
  		case("Idealism"):
  			overhead=0;
  			evaluationError=0.;
  			evenlyDistributedPart=0.;
+ 			applyingIntensity=0.;
+ 			resSkillWeight=1.;
  			break;
  		default:
  		}

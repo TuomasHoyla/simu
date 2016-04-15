@@ -24,8 +24,8 @@ public class Organisation {
 	public ArrayList<Researcher> researcherArray = new ArrayList<>();
 	ArrayList<Researcher> TempResearchersToBeAdded = new ArrayList<>();
 	ArrayList<Researcher> TempResearchersToBeRemoved = new ArrayList<>();
-	public ArrayList<Integer> cumuPaperCounter = new ArrayList<Integer>();
-	public ArrayList<Integer> cumuCitationCounter = new ArrayList<Integer>();
+//	public ArrayList<Integer> cumuPaperCounter = new ArrayList<Integer>();
+//	public ArrayList<Integer> cumuCitationCounter = new ArrayList<Integer>();
 	public ArrayList<Paper> oldPapers = new ArrayList<Paper>();
 	public ArrayList<Paper> removedPapers = new ArrayList<Paper>();
 	int PopulationSize;
@@ -199,7 +199,12 @@ public class Organisation {
 			break;
 		}
 			
-		case("Fixed_HC"): {
+		case("FixedHC"): {
+			for (int i=0;i<simulation.M.levelCount;i++)
+			{
+				PromoteByLevels[i]=simulation.M.PositionLevels[i]-ResearchersByLevels[i];// näin monta tarvitaan lisää alemmilta tasoilta
+				PromotionAge[i]=0;
+			}
 			Collections.sort(researcherArray, vertaaja2);
 			Collections.reverse(researcherArray);
 			int ii=simulation.M.levelCount-1;
@@ -226,17 +231,14 @@ public class Organisation {
 			PromoteByLevels[i]=PromoteByLevels[i+1];
 			}
 			PromoteByLevels[simulation.M.levelCount-1]=0;
+			break;
 		}
 			
 		default: {
 			System.out.println("Organisation: promotion model "+promotionModel+" not known");
 		}
 		}
-		
-
-
-
-		
+				
 	}
 		
 
