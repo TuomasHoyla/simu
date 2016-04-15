@@ -4,18 +4,18 @@ import java.io.*;
 
 
 public class Monitor {
-	private static int[] CumResearchersByLevels= new int[4];
-	private static int[] CumPapersByLevels= new int[4];
-	private static int[] CumCurrentPapers = new int[4];
-	private static int[] CumCurrentCitations = new int[4];	
-	private static int[] CumCitationsByLevels= new int[4];
-	private static double[] CumSkillByLevels = new double[4];
-	private static double[] CumFrustrationByLevels = new double[4];
-	private static int[] CumResignByLevels = new int[4];
+	private static int[] CumResearchersByLevels= new int[8];
+	private static int[] CumPapersByLevels= new int[8];
+	private static int[] CumCurrentPapers = new int[8];
+	private static int[] CumCurrentCitations = new int[8];	
+	private static int[] CumCitationsByLevels= new int[8];
+	private static double[] CumSkillByLevels = new double[8];
+	private static double[] CumFrustrationByLevels = new double[8];
+	private static int[] CumResignByLevels = new int[8];
 	private int cumResign;
-	private static int[] CumPromoteByLevels = new int[4];
-	private static int[] CumRetirementAge = new int[4];
-	private static int[] CumPromotionAge = new int[4];
+	private static int[] CumPromoteByLevels = new int[8];
+	private static int[] CumRetirementAge = new int[8];
+	private static int[] CumPromotionAge = new int[8];
 	private int cumCitationsFromRemoved;
 	private int cumPapersFromRemoved;
 	private int TotalCurrentCitations;
@@ -28,7 +28,7 @@ public class Monitor {
 
 public void resetCounters()
 {
-	for (int i=0; i<4;i++)
+	for (int i=0; i<simulation.M.levelCount;i++)
 	{
 		CumResearchersByLevels[i]=0;
 		CumCitationsByLevels[i]=0;
@@ -50,7 +50,7 @@ public void resetCounters()
 }
 public void updateCounters()
 {
-	for (int i=0;i<4; i++)
+	for (int i=0;i<simulation.M.levelCount; i++)
 	{
 		CumResearchersByLevels[i]+=simulation.O.ResearchersByLevels[i];
 		CumPapersByLevels[i]+=simulation.O.PapersByLevels[i];
@@ -93,7 +93,7 @@ public void logNarrative() {
 }
 public void report(int y){
 	double yd = y;
-	for (int i=0;i<4;i++) {
+	for (int i=0;i<simulation.M.levelCount;i++) {
 		System.out.print(simulation.M.instanssi +"; "+(i+1)+"; "+CumResearchersByLevels[i]/yd+"; "+CumSkillByLevels[i]/CumResearchersByLevels[i]);
 		System.out.print("; "+CumCurrentPapers[i]/CumResearchersByLevels[i]+"; "+CumCurrentCitations[i]/CumResearchersByLevels[i]);
 		System.out.println("; "+CumResignByLevels[i]/CumResearchersByLevels[i]+"; "+CumPromoteByLevels[i]/CumResearchersByLevels[i]+"; "+CumFrustrationByLevels[i]/CumResearchersByLevels[i] +"; "+CumRetirementAge[i]/CumResignByLevels[i]+"; "+CumPromotionAge[i]/(CumPromoteByLevels[i]+0.0001));		
@@ -103,7 +103,7 @@ public void report(int y){
 public void logReport(int y){
 	double yd = y;
 	String line=" ";
-	for (int i=0;i<4;i++) {
+	for (int i=0;i<simulation.M.levelCount;i++) {
 		line=simulation.M.instanssi +"; "+(i+1)+"; "+CumResearchersByLevels[i]/yd+"; "+CumSkillByLevels[i]/CumResearchersByLevels[i];
 		line+="; "+(CumCurrentPapers[i]+0.00001)/CumResearchersByLevels[i]+"; "+(CumCurrentCitations[i]+.00001)/CumResearchersByLevels[i];
 		line+="; "+(CumResignByLevels[i]+.000001)/CumResearchersByLevels[i]+"; "+(CumPromoteByLevels[i]+.00001)/CumResearchersByLevels[i]+"; "+CumFrustrationByLevels[i]/CumResearchersByLevels[i] +"; "+(CumRetirementAge[i]+.00001)/CumResignByLevels[i]+"; "+CumPromotionAge[i]/(CumPromoteByLevels[i]+0.00001);
@@ -128,7 +128,7 @@ public void logReport(int y){
 public void logReport2(int y, String instance){
 	double yd = y;
 	String line=" ";
-	for (int i=0;i<4;i++) {
+	for (int i=0;i<simulation.M.levelCount;i++) {
 		line=instance +"; "+(i+1)+"; "+CumResearchersByLevels[i]/yd+"; "+CumSkillByLevels[i]/CumResearchersByLevels[i];
 		line+="; "+(CumCurrentPapers[i]+0.00001)/CumResearchersByLevels[i]+"; "+(CumCurrentCitations[i]+.00001)/CumResearchersByLevels[i];
 		line+="; "+(CumResignByLevels[i]+.000001)/CumResearchersByLevels[i]+"; "+(CumPromoteByLevels[i]+.00001)/CumResearchersByLevels[i]+"; "+CumFrustrationByLevels[i]/CumResearchersByLevels[i] +"; "+(CumRetirementAge[i]+.00001)/CumResignByLevels[i]+"; "+CumPromotionAge[i]/(CumPromoteByLevels[i]+0.00001);
@@ -154,7 +154,7 @@ public void countTotals(){
 	TotalFrustration=0;
 	cumResign=0;
 	
-	for (int i=0;i<4; i++) {
+	for (int i=0;i<simulation.M.levelCount; i++) {
 		TotalCurrentPapers+=CumCurrentPapers[i];
 		TotalCurrentCitations+=CumCurrentCitations[i];
 		TotalSkill+=CumSkillByLevels[i];

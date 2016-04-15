@@ -25,7 +25,6 @@ public class Researcher  {
 	private double monetaryProductivity;
 	private double sackingProbability;
 	private boolean leavingOrganization;
-//	private double skillsSummedUp;
 	double timeUsedForApplying;
 	public Vector<Paper> papers = new Vector<Paper>(); 
 	private int paperCount;
@@ -126,19 +125,7 @@ public class Researcher  {
 	}
 	public void setMonetaryFrustration() {
 		int temp = getPositionInOrganization()-1;
-		switch(simulation.M.monetaryFrustrationModel){
-		case("Linear_Decay"): {
-			monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationGrowthRate;
-			break;
-		}
-		case("BiExponential"):{
-			double res= ResourcesForResearch/resourcesNeededToBeMotivated;
-			if(res > 0.5) {monetaryFrustration-= monetaryFrustration*(res-0.5)*simulation.M.frustrationGrowthRate;}
-			if(res < 0.5) {monetaryFrustration+= (1-monetaryFrustration)*(0.5-res)*simulation.M.frustrationGrowthRate;}
-			break;
-		}
-		case("Scaled"): {
-			monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationGrowthRate;
+			monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationRate[temp]/(1-simulation.M.averageResource/simulation.M.desiredResearchEffort);
 			if(ResourcesForResearch < simulation.M.averageResource){
 				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/(1-simulation.M.averageResource);
 			}
@@ -146,22 +133,8 @@ public class Researcher  {
 				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/simulation.M.averageResource;
 				if(monetaryFrustration <0.) {monetaryFrustration=0.;}
 			}
-			break;
 		}
-		case("Tuned"): {
-			monetaryFrustration += (1-ResourcesForResearch/resourcesNeededToBeMotivated)*simulation.M.frustrationRate[temp];
-			if(ResourcesForResearch < simulation.M.averageResource){
-				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/(1-simulation.M.averageResource);
-			}
-			else {
-				monetaryFrustration +=simulation.M.secondaryFrustrationRate*(simulation.M.averageResource- ResourcesForResearch)/simulation.M.averageResource;
-				if(monetaryFrustration <0.) {monetaryFrustration=0.;}
-			}
-			break;
-		}
-		default : { System.out.println("Researcher "+simulation.M.monetaryFrustrationModel);}
-		}
-	}
+
 
 	/**
 	 * sets Promotional frustration, 
@@ -242,15 +215,11 @@ public class Researcher  {
 	 * Set base and monetary productivity and sums them up
 	 */
 	public void setProductivity() {
-		if(simulation.M.productivityModel=="Summative"){
-			this.baseProductivity = 1-getFrustration()*simulation.M.frustrationProductivityWeight;
-			monetaryProductivity =  (ResourcesForResearch/resourcesNeededToBeMotivated);
-			productivity = baseProductivity+simulation.M.monetaryProductivityWeight*(monetaryProductivity-baseProductivity);		
-		}
-		else {
-			this.baseProductivity = 1-getFrustration()*simulation.M.frustrationProductivityWeight;
-			productivity = baseProductivity;		
-		}
+
+		this.baseProductivity = 1-getFrustration()*simulation.M.frustrationProductivityWeight;
+		monetaryProductivity =  (ResourcesForResearch/resourcesNeededToBeMotivated);
+		productivity = baseProductivity+simulation.M.monetaryProductivityWeight*(monetaryProductivity-baseProductivity);		
+
 	}
 
 	public double getTimeAvailableForResearch() {
@@ -283,34 +252,10 @@ public class Researcher  {
 	 */
 	public void setQualityOfApplication (double evaluationError) {
 		double evalError=1.;
-		timeUsedForApplying = simulation.M.defaultResearchTime*simulation.M.applyingIntensity*(1-totalFrustration);
-		switch(simulation.M.applicationQualityModel) {
-		case("Skill"):{
-			qualityOfApplication = (researchSkill); 
-			break;
-		}
-			
-		case("Time_and_skill_mult"):{
-			qualityOfApplication = (Math.sqrt(timeUsedForApplying*researchSkill)*applyingSkill);
-			break;
-		}
-			
-		case("Time_and_skill_sum"):	{
-			qualityOfApplication = Math.sqrt(timeUsedForApplying)*(researchSkill+applyingSkill);
-			break;
-		}
-			
-		case("Skill_and_appl"):{
-			qualityOfApplication =(researchSkill + Math.sqrt(timeUsedForApplying)*applyingSkill);
-			break;
-		}
-			
-		case("CombinedNormalized"):{
-			qualityOfApplication= (simulation.M.resSkillWeight*researchSkill + (1-simulation.M.resSkillWeight)*applyingSkill*(1-totalFrustration));
-			break;
-		}
-		default: {System.out.println("application quality model");}	
-		}
+//		timeUsedForApplying = simulation.M.defaultResearchTime*simulation.M.applyingIntensity*(1-totalFrustration);
+
+		qualityOfApplication= (simulation.M.resSkillWeight*researchSkill + (1-simulation.M.resSkillWeight)*applyingSkill*(1-totalFrustration));
+
 
 		switch(simulation.M.evaluationErrorModel) {
 		case("Mult"):
@@ -354,21 +299,9 @@ public class Researcher  {
 	}
 	public void publish(int currentYear)
 	{
-		switch(simulation.M.publishingModel)  {
-		case("PoissonMultiplier"):{//time times productivity (not needed as the next one is more general case)
-			paperCount = simulation.randomGenerator.createPoisson2(this.getTimeAvailableForResearch()*simulation.M.publishingScale*this.getProductivity());				
-			break;
-		}
-		case("PoissonTempered"):{ //time times (cst+ productivity)
-			paperCount = simulation.randomGenerator.createPoisson2(this.getTimeAvailableForResearch()*simulation.M.publishingScale*(simulation.M.publishingOffset+this.getProductivity()));				
-			break;
-		}
-		case("Flatrate"):{
-			paperCount = simulation.randomGenerator.createPoisson2(simulation.M.publishingScale*this.getTimeAvailableForResearch()*(1-simulation.M.productivityCoefficient+this.getProductivity()*simulation.M.productivityCoefficient));							
-			break;
-		}	
-		default: {System.out.println(simulation.M.publishingModel);}
-		}
+
+		paperCount = simulation.randomGenerator.createPoisson2(simulation.M.publishingScale*this.getTimeAvailableForResearch()*(1-simulation.M.productivityCoefficient+this.getProductivity()*simulation.M.productivityCoefficient));							
+
 
 		if (paperCount < 0) paperCount = 0; //Prevents negative counts
 	

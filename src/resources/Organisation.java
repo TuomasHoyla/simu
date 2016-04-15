@@ -18,8 +18,8 @@ import main.simulation;
 
 public class Organisation {
 	
-	public int PositionLevels[] = new int[4];
-	public int sackingAge[] = new int[4];
+	public int PositionLevels[] = new int[8];
+	public int sackingAge[] = new int[8];
 	public double promotionTreshold;
 	public ArrayList<Researcher> researcherArray = new ArrayList<>();
 	ArrayList<Researcher> TempResearchersToBeAdded = new ArrayList<>();
@@ -38,17 +38,17 @@ public class Organisation {
 	String promotionModel;
 	public int citationsFromRemovedResearchers;
 	public int papersFromRemovedResearchers;
-	public int[] ResearchersByLevels= new int[4];
-	public int[] PapersByLevels= new int[4];
-	public int[] CurrentPapers = new int[4];
-	public int[] CurrentCitations = new int[4];	
-	public int[] CitationsByLevels= new int[4];
-	public int[] ResignByLevels= new int[4];
-	public int[] PromoteByLevels =new int[4];
-	public int[] RetirementAge = new int[4];
-	public int[] PromotionAge = new int[4];
-	public double[] SkillByLevels = new double[4];
-	public double[] FrustrationByLevels = new double[4];
+	public int[] ResearchersByLevels= new int[8];
+	public int[] PapersByLevels= new int[8];
+	public int[] CurrentPapers = new int[8];
+	public int[] CurrentCitations = new int[8];	
+	public int[] CitationsByLevels= new int[8];
+	public int[] ResignByLevels= new int[8];
+	public int[] PromoteByLevels =new int[8];
+	public int[] RetirementAge = new int[8];
+	public int[] PromotionAge = new int[8];
+	public double[] SkillByLevels = new double[8];
+	public double[] FrustrationByLevels = new double[8];
 	
 	Comparator<Researcher> vertaaja = new Comparator<Researcher>(){
 		public int compare(Researcher p1, Researcher p2) {
@@ -69,7 +69,7 @@ public class Organisation {
 	
 	public void initialize()
 	{
-	for(int i=0; i<4;i++){
+	for(int i=0; i<simulation.M.levelCount;i++){
 		PositionLevels[i] = simulation.M.PositionLevels[i];
 		sackingAge[i] = simulation.M.sackingAge[i];
 	}
@@ -79,7 +79,7 @@ public class Organisation {
 	promotionModel = simulation.M.promotionModel;
 
 	// Initialize a researcher array (with random research skills and right amount of  instances to each level
-	for (int i=0; i<4;i++){		
+	for (int i=0; i<simulation.M.levelCount;i++){		
 		for (int j=0; j<main.simulation.M.PositionLevels[i];j++){
 			researcherArray.add(new Researcher(RandomGenerator.nextSessionId() , 0, main.simulation.randomGenerator.createResSkill(), main.simulation.randomGenerator.createSkill(), 0, 0, i+1));	
 		}
@@ -89,13 +89,13 @@ public class Organisation {
 
 	public void RemoveResearchers() 
 	{
-		for (int i=0;i<4;i++) {ResignByLevels[i]=0;
+		for (int i=0;i<simulation.M.levelCount;i++) {ResignByLevels[i]=0;
 		RetirementAge[i]=0;}
 		for (Researcher doc : researcherArray) 
 		{
 			doc.consumeMoney();	
 			doc.addYear();
-			if (doc.getYearsInAcademia() >= sackingAge[3] && main.simulation.randomGenerator.createRandomDouble() >= sackingResistance) 
+			if (doc.getYearsInAcademia() >= sackingAge[simulation.M.levelCount-1] && main.simulation.randomGenerator.createRandomDouble() >= sackingResistance) 
 			{
 				doc.setSackingProbability(1.);
 			}
@@ -119,7 +119,7 @@ public class Organisation {
 	
 	public void CountByLevels()
 	{
-	for (int i=0;i<4; i++)
+	for (int i=0;i<simulation.M.levelCount; i++)
 	{
 		ResearchersByLevels[i]=0;
 		PapersByLevels[i]=0;
@@ -140,7 +140,8 @@ public class Organisation {
 	public void AddResearchers()
 	{
 		CountByLevels();
-		int temp= ResearchersByLevels[0]+ResearchersByLevels[1]+ResearchersByLevels[2]+ResearchersByLevels[3];
+		int temp= ResearchersByLevels[0];
+		for (int i=1; i<simulation.M.levelCount; i++) {temp+=ResearchersByLevels[i];}
 		for (int i=0;i< PopulationSize-temp;i++)
 		{
 			researcherArray.add(new Researcher(RandomGenerator.nextSessionId() , 0, main.simulation.randomGenerator.createResSkill(), main.simulation.randomGenerator.createSkill(), 0, 0, 1));
@@ -149,9 +150,9 @@ public class Organisation {
 	
 	public void promote() {
 
-		double[] citationaverage = new double[4]; 
+		double[] citationaverage = new double[8]; 
 		CountByLevels();
-		for (int i=0;i<4;i++){
+		for (int i=0;i<simulation.M.levelCount;i++){
 			citationaverage[i]= CitationsByLevels[i]/((double) ResearchersByLevels[i]);
 			PromoteByLevels[i]=0;
 			PromotionAge[i]=0;
@@ -171,7 +172,7 @@ public class Organisation {
 		}
 		
 		case("Position_based"):{
-			for (int i=3;i>0; i--)
+			for (int i=simulation.M.levelCount-1;i>0; i--)
 			{
 				for(Researcher doc : researcherArray) {
 					if (doc.getPositionInOrganization() == i &&  doc.getYearsInPosition() >= sackingAge[i-1] && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) 
@@ -186,7 +187,7 @@ public class Organisation {
 		}
 			
 		case("Citation_only"): {
-			for (int i=3;i>0; i--){
+			for (int i=simulation.M.levelCount-1;i>0; i--){
 				for(Researcher doc : researcherArray) {
 					if (doc.getPositionInOrganization() == i && (doc.getCitations() >= promotionTreshold*citationaverage[i-1])) {
 						doc.setPositionInOrganization(i+1);
@@ -201,7 +202,7 @@ public class Organisation {
 		case("Fixed_HC"): {
 			Collections.sort(researcherArray, vertaaja2);
 			Collections.reverse(researcherArray);
-			int ii=3;
+			int ii=simulation.M.levelCount-1;
 			int jj=0;
 			
 			for(Researcher doc : researcherArray) {
@@ -221,10 +222,10 @@ public class Organisation {
 					PromotionAge[ii-1]+=doc.getYearsInAcademia();
 				}
 			}
-			for (int i=0; i<3; i++){
+			for (int i=0; i<simulation.M.levelCount-1; i++){
 			PromoteByLevels[i]=PromoteByLevels[i+1];
 			}
-			PromoteByLevels[3]=0;
+			PromoteByLevels[simulation.M.levelCount-1]=0;
 		}
 			
 		default: {
@@ -242,7 +243,7 @@ public class Organisation {
 
 public void publish(int currentYear) {
 	
-	for (int i=0;i<4;i++)
+	for (int i=0;i<simulation.M.levelCount;i++)
 	{
 		CurrentPapers[i]=0;
 		CurrentCitations[i]=0;

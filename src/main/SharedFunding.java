@@ -49,12 +49,12 @@ public class SharedFunding {
 				return 0;
 			}
 		};
-		int[] headcount=new int[4];
+		int[] headcount=new int[8];
 		double netResources = (1-simulation.M.overhead)*simulation.M.maximumResearchEffort*simulation.M.AllocatableResource; 		
 		double securedResources = netResources*simulation.M.evenlyDistributedPart; 
 		double securedFundingLevel = securedResources/simulation.O.researcherArray.size();
 		securedFunding = securedFundingLevel;
-		for(int i=0; i<4; i++) { headcount[i]=0;}
+		for(int i=0; i<simulation.M.levelCount; i++) { headcount[i]=0;}
 		
 		for (Researcher researcher: simulation.O.researcherArray) {
 			researcher.setQualityOfApplication(simulation.M.evaluationError);
@@ -64,7 +64,7 @@ public class SharedFunding {
 		Collections.sort(simulation.O.researcherArray, vertaaja3);
 		Collections.reverse(simulation.O.researcherArray);
 		int ii=0;
-		for(int i=4; i>0; i--) {
+		for(int i=simulation.M.levelCount; i>0; i--) {
 			funding =(netResources-securedResources)*headcount[i-1]/simulation.M.PopulationSize; 
 			int iii=ii+headcount[i-1];	
 			for (Researcher researcher: simulation.O.researcherArray.subList(ii, iii)) {

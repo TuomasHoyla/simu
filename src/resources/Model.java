@@ -1,8 +1,7 @@
 package resources;
 import java.util.ArrayList;
 import java.util.Properties;
-import configreader.getPropertyValues;
-import java.io.IOException;
+
 
 public class Model {
 	
@@ -29,7 +28,7 @@ public class Model {
 	public int[] sackingAge = new int[8];
 
 // funding related
-	public String allocationScheme;
+//	public String allocationScheme;
 	public String evaluationErrorModel;
 	public double evaluationError;
 	public double overhead; // 0 - 1
@@ -43,12 +42,12 @@ public class Model {
 	public double defaultResearchTime; //computed
 
 //publishing related parameters	
-	public String publishingModel;
+//	public String publishingModel;
 	public double publishingScale; //computed
-	public double publishingOffset; //is it needed?
+//	public double publishingOffset; 
 	public double productivityCoefficient;
 	public String paperQualityModel;
-	public String citationModel; // for Paper
+//	public String citationModel; // for Paper
 	public double paperQualityParameter;
 	
 
@@ -57,8 +56,7 @@ public class Model {
 	public double neededToBeMotivated= 1; //pidet‰‰n vakiona (k‰ytet‰‰n vain konstruktorissa nyt)
 	public double applyingIntensity;
 	public double defaultMonetaryFrustration;
-	public String monetaryFrustrationModel;
-	public double frustrationGrowthRate;
+//	public String monetaryFrustrationModel;
 	public double[] frustrationRate = new double[8];
 	public double secondaryFrustrationRate;
 	public double defaultPromotionalFrustration;
@@ -68,22 +66,22 @@ public class Model {
 	public double sackingResistance;
 	public double monetaryFrustrationWeight;
 	public double promotionalFrustrationWeight;
-	public String productivityModel;
+//	public String productivityModel;
 	public double frustrationProductivityWeight;
 	public double monetaryProductivityWeight;
-	public String applicationQualityModel;
+//	public String applicationQualityModel;
 	public double resSkillWeight;
 	
 	
-	public String skillModel; // for random generators
+//	public String skillModel; // for random generators
 	public double skillParameter;
-	public String researchSkillModel;
+//	public String researchSkillModel;
 	public double fitnessVariance;
 	public double fitnessSkillFactor;
 	public double researchSkillParameter;
 
 
-	public String caseheader ="Case"; //depends on design
+	public String caseheader; //depends on design
 	public String instanssi; //computed by experiment
 	public String narrative; //computed 
 	
@@ -96,20 +94,23 @@ public void resetModel(Properties config){
 	Properties prop =config;
 	try {
 		levelCount =Integer.parseInt((prop.getProperty("levelCount")));
-		PositionLevels[0]= Integer.parseInt((prop.getProperty("PositionLevels0")));
-		PositionLevels[1]= Integer.parseInt((prop.getProperty("PositionLevels1")));
-		PositionLevels[2]= Integer.parseInt((prop.getProperty("PositionLevels2")));
-		PositionLevels[3]= Integer.parseInt((prop.getProperty("PositionLevels3")));
+		String temp[] = prop.getProperty("positionLevels").split(",");
+		for(int i=0; i< levelCount; i++) {PositionLevels[i]= Integer.parseInt(temp[i]);}
+		temp =prop.getProperty("sackingAge").split(",");
+		for(int i=0; i< levelCount; i++) {sackingAge[i]= Integer.parseInt(temp[i]);}
+		temp =prop.getProperty("promotionalFrustrationAge").split(",");
+		for(int i=0; i< levelCount; i++) {promotionalFrustrationAge[i]= Integer.parseInt(temp[i]);}
+		temp =prop.getProperty("promotionalFrustrationRate").split(",");
+		for(int i=0; i< levelCount; i++) {promotionalFrustrationrate[i]= Double.parseDouble(temp[i]);}
+		temp =prop.getProperty("frustrationRate").split(",");
+		for(int i=0; i< levelCount; i++) {frustrationRate[i]= Double.parseDouble(temp[i]);}
+
 		PopulationSize = 0;
 		for (int i=0; i<levelCount; i++) {PopulationSize+=PositionLevels[i];}
+
 		promotionModel = prop.getProperty("promotionModel");
 		promotionTreshold = Double.parseDouble(prop.getProperty("promotionTreshold")); 
-		sackingAge[0]=Integer.parseInt((prop.getProperty("sackingAge0")));
-		sackingAge[1]=Integer.parseInt((prop.getProperty("sackingAge1")));
-		sackingAge[2]=Integer.parseInt((prop.getProperty("sackingAge2")));
-		sackingAge[3]=Integer.parseInt((prop.getProperty("sackingAge3")));
 		sackingResistance=Double.parseDouble(prop.getProperty("sackingResistance"));	
-		allocationScheme=prop.getProperty("allocationScheme");
 		evaluationErrorModel= prop.getProperty("evaluationErrorModel");
 		evaluationError=Double.parseDouble(prop.getProperty("evaluationError"));
 		overhead = Double.parseDouble(prop.getProperty("overhead"));
@@ -121,52 +122,31 @@ public void resetModel(Properties config){
 		averageResource=AllocatableResource/PopulationSize;
 		desiredResearchEffort = 1-defaultResearchTime;	
 		maximumResearchEffort = 1; //fixed
-		publishingModel=prop.getProperty("publishingModel");
 		publishingScale=1./resourceLevel; 
 		productivityCoefficient=Double.parseDouble(prop.getProperty("productivityCoefficient"));
-		publishingOffset=1.; //needed?
 		paperQualityModel = prop.getProperty("paperQualityModel");
-		citationModel=prop.getProperty("citationModel");
 		applyingIntensity=Double.parseDouble(prop.getProperty("applyingIntensity"));
 		defaultMonetaryFrustration =Double.parseDouble(prop.getProperty("defaultMonetaryFrustration"));		
-		monetaryFrustrationModel=prop.getProperty("monetaryFrustrationModel");
-		frustrationGrowthRate =Double.parseDouble(prop.getProperty("frustrationGrowthRate"))/(1-averageResource/desiredResearchEffort);
-		frustrationRate[0]=Double.parseDouble(prop.getProperty("frustrationRate0"))/(1-averageResource/desiredResearchEffort);
-		frustrationRate[1]=Double.parseDouble(prop.getProperty("frustrationRate1"))/(1-averageResource/desiredResearchEffort);
-		frustrationRate[2]=Double.parseDouble(prop.getProperty("frustrationRate2"))/(1-averageResource/desiredResearchEffort);
-		frustrationRate[3]=Double.parseDouble(prop.getProperty("frustrationRate3"))/(1-averageResource/desiredResearchEffort);
-		secondaryFrustrationRate=Double.parseDouble(prop.getProperty("productivityCoefficient"));
-		defaultPromotionalFrustration = Double.parseDouble(prop.getProperty("productivityCoefficient"));		
+		secondaryFrustrationRate=Double.parseDouble(prop.getProperty("secondaryFrustrationRate"));
+		defaultPromotionalFrustration = Double.parseDouble(prop.getProperty("defaultPromotionalFrustration"));		
 		promotionalFrustrationModel=prop.getProperty("promotionalFrustrationModel");
-		promotionalFrustrationAge[0] = Integer.parseInt(prop.getProperty("promotionalFrustrationAge0"));
-		promotionalFrustrationAge[1] = Integer.parseInt(prop.getProperty("promotionalFrustrationAge1"));
-		promotionalFrustrationAge[2] = Integer.parseInt(prop.getProperty("promotionalFrustrationAge2"));
-		promotionalFrustrationAge[3] = Integer.parseInt(prop.getProperty("promotionalFrustrationAge3"));
-		promotionalFrustrationrate[0] = Double.parseDouble(prop.getProperty("promotionalFrustrationRate0")); 
-		promotionalFrustrationrate[1] = Double.parseDouble(prop.getProperty("promotionalFrustrationRate1"));
-		promotionalFrustrationrate[2] = Double.parseDouble(prop.getProperty("promotionalFrustrationRate2"));
-		promotionalFrustrationrate[3] = Double.parseDouble(prop.getProperty("promotionalFrustrationRate3"));
 		monetaryFrustrationWeight=Double.parseDouble(prop.getProperty("monetaryFrustrationWeight"));
 		promotionalFrustrationWeight=Double.parseDouble(prop.getProperty("promotionalFrustrationWeight"));
 		sackingResistance=Double.parseDouble(prop.getProperty("sackingResistance"));
-		productivityModel=prop.getProperty("productivityModel");
 		frustrationProductivityWeight=Double.parseDouble(prop.getProperty("frustrationProductivityWeight"));
 		monetaryProductivityWeight=Double.parseDouble(prop.getProperty("monetaryProductivityWeight"));
-		applicationQualityModel=prop.getProperty("applicationQualityModel");
 		resSkillWeight=Double.parseDouble(prop.getProperty("resSkillWeight"));
-			
-			
-		researchSkillModel=prop.getProperty("researchSkillModel");
+				
 		fitnessVariance=Double.parseDouble(prop.getProperty("fitnessVariance"));
 		fitnessSkillFactor=Double.parseDouble(prop.getProperty("fitnessSkillFactor"));
 		researchSkillParameter=Math.sqrt(fitnessVariance*fitnessSkillFactor);
 		paperQualityParameter=Math.sqrt(fitnessVariance*(1-fitnessSkillFactor));
-		skillModel=prop.getProperty("skillModel"); 
-		skillParameter=researchSkillParameter; 
+		skillParameter=researchSkillParameter; 	
 	
 	} catch (Exception e) {
 		System.out.println("Problems reading configuration file");
 		System.out.println(prop);
+		e.printStackTrace();
 
 	}
 	
@@ -209,23 +189,120 @@ public void configureExperiments(Properties experiment) {
 public void setFactor(String name, String value) {
 
  	switch (name) {
-		
-		case "resourceLevel": 
+ 	
+ 	case "promotionModel":
+ 		promotionModel=value;
+ 		break;
+ 	case "evaluationErrorModel":
+ 		evaluationErrorModel=value;
+ 		break;
+ 	case "paperQualityModel":
+ 		paperQualityModel=value;
+ 		break;
+ 	case "promotionalFrustrationModel":
+ 		promotionalFrustrationModel=value;
+ 		break;	
+	
+ 	case "allocationScheme":
+// 		allocationScheme=value;
+ 		switch(value) {
+ 		case("Lottery"):
+ 			overhead=0.;
+ 			evenlyDistributedPart=0.;
+ 			evaluationError=1.;
+ 			break;
+ 		case("Communism"):
+ 			overhead=0.;
+ 			evenlyDistributedPart=1;
+ 			break;
+ 		case("Capitalism"):
+ 		case("Idealism"):
+ 			overhead=0;
+ 			evaluationError=0.;
+ 			evenlyDistributedPart=0.;
+ 			break;
+ 		default:
+ 		}
+ 		break;	
+ 		
+	case "resourceLevel": 
 		resourceLevel = Double.parseDouble(value);
 		defaultResearchTime=defaultResearchShare*resourceLevel;
 		AllocatableResource = PopulationSize*resourceLevel*(1-defaultResearchShare);
 		averageResource=AllocatableResource/PopulationSize;
 		desiredResearchEffort = 1-defaultResearchTime;	
 		publishingScale=1./resourceLevel; 
-		break;
-		
-		case "defaultResearchShare":
+		break;		
+	case "defaultResearchShare":
 		defaultResearchShare = Double.parseDouble(value);
 		defaultResearchTime=defaultResearchShare*resourceLevel;
 		AllocatableResource = PopulationSize*resourceLevel*(1-defaultResearchShare);
 		desiredResearchEffort = 1-defaultResearchTime;	
+		break;		
+	case "evaluationError":
+		evaluationError=Double.parseDouble(value);
 		break;
-		
+	case "overhead":
+		overhead=Double.parseDouble(value);
+		break;
+	case "evenlyDistributedPart":
+		evenlyDistributedPart=Double.parseDouble(value);
+		break;
+	case "promotionTreshold":
+		promotionTreshold=Double.parseDouble(value);
+		break;
+	case "sackingResistance":
+		sackingResistance=Double.parseDouble(value);
+		break;
+	case "productivityCoefficient":
+		productivityCoefficient=Double.parseDouble(value);
+		break;
+	case "applyingIntensity":
+		applyingIntensity=Double.parseDouble(value);
+		break;
+	case "defaultMonetaryFrustration":
+		defaultMonetaryFrustration=Double.parseDouble(value);
+		break;
+	case "secondaryFrustrationRate":
+		secondaryFrustrationRate=Double.parseDouble(value);
+		break;
+	case "defaultPromotionalFrustration":
+		defaultPromotionalFrustration=Double.parseDouble(value);
+		break;
+	case "monetaryFrustrationWeight":
+		monetaryFrustrationWeight=Double.parseDouble(value);
+		break;
+	case "promotionalFrustrationWeight":
+		promotionalFrustrationWeight=Double.parseDouble(value);
+		break;
+	case "frustrationProductivityWeight":
+		frustrationProductivityWeight=Double.parseDouble(value);
+		break;
+	case "monetaryProductivityWeight":
+		monetaryProductivityWeight=Double.parseDouble(value);
+		break;
+	case "resSkillWeight":
+		resSkillWeight=Double.parseDouble(value);
+		break;
+	case "fitnessVariance":
+		fitnessVariance=Double.parseDouble(value);
+		researchSkillParameter=Math.sqrt(fitnessVariance*fitnessSkillFactor);
+		paperQualityParameter=Math.sqrt(fitnessVariance*(1-fitnessSkillFactor));
+		break;
+	case "fitnessSkillFactor":
+		fitnessSkillFactor=Double.parseDouble(value);
+		researchSkillParameter=Math.sqrt(fitnessVariance*fitnessSkillFactor);
+		paperQualityParameter=Math.sqrt(fitnessVariance*(1-fitnessSkillFactor));
+		break;
+	case "paperQualityParameter":
+		paperQualityParameter=Double.parseDouble(value);
+		break;
+	case "researchSkillParameter":
+		researchSkillParameter=Double.parseDouble(value);
+		skillParameter=researchSkillParameter; 
+
+	default:
+		System.out.println("Factor "+name+" not recognized");		
 	}
 	
 }
@@ -240,15 +317,12 @@ narrative+=text+"\n";
 	public void setNarrative(){
 		narrative="Default values \n";
 		narrative+="Population size = "+ PopulationSize + " allocatable resource = "+AllocatableResource;
-		narrative+=" Allocation Scheme "+allocationScheme+ "\n";
-		narrative+="Promotion model is "+promotionModel+ " "+promotionTreshold+" Publishing model is "+publishingModel+" "+publishingScale+"\n";
+		narrative+="Promotion model is "+promotionModel+ " "+promotionTreshold+" Publishing scale is "+publishingScale+"\n";
 		narrative+="Evaluation error model is "+evaluationErrorModel+"\n";
-		narrative+="Paper quality model "+paperQualityModel+" Productivity model "+productivityModel+"\n";
-		narrative+="Application quality model "+applicationQualityModel+"\n";
-		narrative+="Skill model "+skillModel+" "+skillParameter;
-		narrative+=" Research skill model "+researchSkillModel+" "+researchSkillParameter+"\n";
-		narrative+="Citation model "+citationModel+"\n";
-		narrative+="Frustration model "+monetaryFrustrationModel+" "+frustrationGrowthRate+" "+secondaryFrustrationRate+"\n";
+		narrative+="Paper quality model "+paperQualityModel+"\n";
+		narrative+="Skill parameter "+skillParameter;
+		narrative+=" Research skill parameter "+researchSkillParameter+"\n";
+		narrative+="Frustration rates "+frustrationRate[0]+" "+secondaryFrustrationRate+"\n";
 		narrative+="Frustration rates "+frustrationRate[0]+" "+frustrationRate[1]+" "+frustrationRate[2]+" "+frustrationRate[3]+"\n";
 		narrative+="Promotional frustration ages "+promotionalFrustrationAge[0]+" "+promotionalFrustrationAge[1]+" "+promotionalFrustrationAge[2]+" "+promotionalFrustrationAge[3]+"\n";
 		narrative+="Promotional frustration rates "+promotionalFrustrationrate[0]+" "+promotionalFrustrationrate[1]+" "+promotionalFrustrationrate[2]+" "+promotionalFrustrationrate[3]+"\n";

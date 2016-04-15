@@ -127,18 +127,8 @@ public class RandomGenerator {
 	 */
 	public double createSkill() {
 
-//		if(simulation.M.skillModel=="LogNormal") {
 		return createLogDistributedRandomValue(0.0, simulation.M.skillParameter);
-/*		}
-		else if(simulation.M.skillModel=="LogNormalScaled") {
-			return createLogDistributedRandomValue(0.0, 0.35)/1.0637;
-		}
-			
-		else {
-			System.out.println("Invalid skillModel "+ simulation.M.skillModel);
-			
-			return 1.0;
-		}*/
+
 	}
 	
 
@@ -146,13 +136,8 @@ public class RandomGenerator {
 	public double createResSkill() {
 		
 		
-//		if(simulation.M.researchSkillModel=="LogNormal") {
 			return createLogDistributedRandomValue(0, simulation.M.researchSkillParameter);
-//		}
-//		else {
-//			System.out.println("Invalid researchSkillModel |"+ simulation.M.researchSkillModel+"|");
-//			return 1.0;
-//		}
+
 	
 	}
 
