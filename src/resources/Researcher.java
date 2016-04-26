@@ -252,7 +252,7 @@ public class Researcher  {
 	 */
 	public void setQualityOfApplication (double evaluationError) {
 		double evalError=1.;
-//		timeUsedForApplying = simulation.M.defaultResearchTime*simulation.M.applyingIntensity*(1-totalFrustration);
+		timeUsedForApplying = simulation.M.defaultResearchTime*simulation.M.applyingIntensity*(1-totalFrustration);
 
 		qualityOfApplication= (simulation.M.resSkillWeight*researchSkill + (1-simulation.M.resSkillWeight)*applyingSkill*(1-totalFrustration));
 
@@ -301,7 +301,6 @@ public class Researcher  {
 	{
 
 		paperCount = simulation.randomGenerator.createPoisson2(simulation.M.publishingScale*this.getTimeAvailableForResearch()*(1-simulation.M.productivityCoefficient+this.getProductivity()*simulation.M.productivityCoefficient));							
-
 
 		if (paperCount < 0) paperCount = 0; //Prevents negative counts
 	
