@@ -1,7 +1,6 @@
 
 package resources;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Vector;
 
 
@@ -32,9 +30,9 @@ public class FileRead {
 			DataInputStream in = new DataInputStream(fstream);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String strLine;         
-			int lineNumber = 0;
-			double [] a = null;
-			double [] b = null;
+//			int lineNumber = 0;
+//			double [] a = null;
+//			double [] b = null;
 			// Read File Line By Line
 			while ((strLine = br.readLine()) != null) {
 
@@ -56,24 +54,6 @@ public class FileRead {
 		writer.close();
 	}
 	
-	/* DEPRICATED
-	public void writeLines2(String toWrite, double fileOrderNumber, double luku) throws FileNotFoundException, UnsupportedEncodingException{
-    File log = new File("log"+fileOrderNumber+".txt");
-    try{
-    if(log.exists()==false){
-            System.out.println("We had to make a new file.");
-            log.createNewFile();
-    }
-    PrintWriter out = new PrintWriter(new FileWriter(log, true));
-    out.println(toWrite);
- //   out.println("\n");
- //   out.append("\n");
-    out.close();
-    }catch(IOException e){
-        System.out.println("COULD NOT LOG!!");
-    }
-	}
-	*/
 	
 	public static void writeLines3(String toWrite, String file) throws FileNotFoundException, UnsupportedEncodingException{
 	    File log = new File(file);
@@ -90,7 +70,7 @@ public class FileRead {
 	    }
 		}
 	
-
+/*
 	public static void main(String[] args) {
 
 		Vector<Double> returni = new Vector<Double>();
@@ -101,6 +81,6 @@ public class FileRead {
 			System.out.println(luku);
 		}
 	}
-
+*/
 }
 
