@@ -28,13 +28,24 @@ import java.util.Properties;
 public class getPropertyValues {
 	 
 		InputStream inputStream;
+		String propFilename;
+		
+		//Default constructor
+		public getPropertyValues() {
+			this.propFilename = "config.properties";
+		}
+		
+		//Constructor if filename exists
+		public getPropertyValues(String filename) {
+			this.propFilename = filename;
+		}
 	 
 		public Properties getPropValues() throws IOException {
 	 
 			Properties prop = new Properties();
 			try {
 				
-				String propFileName = "config.properties";
+				String propFileName = this.propFilename;
 	 
 				inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 	 

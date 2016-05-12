@@ -1,513 +1,139 @@
 package main;
 
-/** TODO
- * 
- * - simulointi-luokkaa pitänee faktoroida niin, että irrotetaan organisaatioon liittyvät osat (organisaatiokohtainen tutkijapooli, rekrytointi ja promootiomekanismit jne) omaksi luokakseen, mikä mahdollistaisi jatkossa useamman organisaation simuloinnin ja jättäisi simulointiluokan vastaamaan kokonaisuuden rakenteesta ja simulointikokeen ajamisesta
-- Model luokan sisällöistä irrotetaan osa experiment-luokaksi (koekaavion hallinta ja mallin muokkaus faktori faktorilta, toistojen määrät yms, syöttö ja tulostiedostot
-- mallin sisällölliset luokat (kuten Researcher, paper uusi organisation luokka) kirjoitetaan takaisin käyttämään sisäisiä muuttujia (Model-luokan muuttujien sijaan) ja lisätään config tms metodi, joka alustaa sisäiset vakiot/parametrit Model-luokan pohjalta. Tällöin Model-luokkaan tehtävät viittaukset voivat olla tarvittaessa epäsuorempia. mahdollisesti sisältöluokat vastaisivat omasta tiedon monitoroinnistaan.
-
-Kokonaiskuva olisi jotain seuraavan kaltaista:
-- luetaan "experiment_config" -tiedosto, joka määrittelee simuloinnin keston, toistot, mittauspisteet sekä koekaavion (faktorit, tasot) ja mallin oletuskonfiguraation tiedoston ja tulostiedostot kuvausteksteineen
-- luetaan mallin oletuskonfi (parametrien nimi + arvoparit)
-- parseroidaan koekaavio ja jokaiselle tunnistetulle kokeelle
--- alustetaan malli oletusarvoon
--- konfataan malli a.o. kokeen faktorien mukaan
--- alustetaan mallin sisältöluokat konfatun mallin mukaiseksi ja tulosmonitorit koesuunnitelman mukaisiksi
--- simuloidaan koepisteen malliversio määritellyin toistoin
--- tallennetaan tulokset
-
-Ainakin itsestäni tuo ylläkuvattu vaikuttaa pääosin suoraviivaiselta. Omat Java-taitoni tällä hetkellä ylittäviä osuuksia ovat
-- robusti tietojen luku
-
-- mallin virkarakenteen yleistäminen (nyt hard-koodattu neljä tasoa mutta n-tasoa olisi joustavampi). 
-En aikanaan onnistunut tekemään tutkijalistoista taulukkoa, jolloin saisi luupattua yli tasokohtaisten 
-listojen ja voisi pitää eri tasojen kohortit erillisinä
-
-- 2-k kokeen konfaus (tiedostosta luettavalle faktorilistalle ja k:n arvolle) 
-(edellyttänee jonkin tyyppistä rekursiota, jos k ei ole kiinteä) 
-[käytännössä experiment konfi voisi sisältää koekaavion tyyliin
-faktori; tasojen määrä; arvo1; arvo2; jne]
- * 
- */
 
 
-import java.io.IOException;
 import java.text.DecimalFormat;
+
+import configreader.getPropertyValues;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Properties;
 
 import resources.*;
-import configreader.getPropertyValues;
 
 public class simulation {
 	
 	public static Model M = new Model();
 	public static Monitor mon = new Monitor();
+	public static Organisation O = new Organisation();
 	FileRead fileread = new FileRead();
 	DecimalFormat df = new DecimalFormat("#.##");
-	applyForFunds funder = new applyForFunds();
+	SharedFunding funder = new SharedFunding();
 	public static RandomGenerator randomGenerator = new RandomGenerator();
-	public ArrayList<Researcher> researcherArray = new ArrayList<>();
-	ArrayList<Researcher> TempResearchersToBeAdded = new ArrayList<>();
-	ArrayList<Researcher> TempResearchersToBeRemoved = new ArrayList<>();
-	public ArrayList<Integer> cumuPaperCounter = new ArrayList<Integer>();
-	public ArrayList<Integer> cumuCitationCounter = new ArrayList<Integer>();
-	public static ArrayList<Paper> oldPapers = new ArrayList<Paper>();
-	public static ArrayList<Paper> removedPapers = new ArrayList<Paper>();
-	int addableCitations;
-	int addablePapers;
-	int totalCitations;
-	int totalPapers;
+	public static Properties configs ;
+	public static Properties experiment;
+	public static boolean headingSet=false;
+
 	int year;
-//	private int papersFromRemovedResearchers;
-	public static int citationsFromRemovedResearchers;
-	public static int papersFromRemovedResearchers;
-	public static int[] ResearchersByLevels= new int[4];
-	public static int[] PapersByLevels= new int[4];
-	public static int[] CurrentPapers = new int[4];
-	public static int[] CurrentCitations = new int[4];	
-	public static int[] CitationsByLevels= new int[4];
-	public static int[] ResignByLevels= new int[4];
-	public static int[] PromoteByLevels =new int[4];
-	public static int[] RetirementAge = new int[4];
-	public static int[] PromotionAge = new int[4];
-	public static double[] SkillByLevels = new double[4];
-	public static double[] FrustrationByLevels = new double[4];
-	
-	Comparator<Researcher> vertaaja = new Comparator<Researcher>(){
-		public int compare(Researcher p1, Researcher p2) {
-			if (p1.getQualityOfApplication() < p2.getQualityOfApplication()) return -1;
-			if (p1.getQualityOfApplication() > p2.getQualityOfApplication()) return 1;
-			return 0;
+
+	//Default constructor
+	public simulation() {
+		getPropertyValues configfile = new getPropertyValues("config.properties"); //lacks other file as a parameter
+		getPropertyValues experimentfile = new  getPropertyValues("experiment.properties");
+		try {
+		configs = configfile.getPropValues();
+		experiment = experimentfile.getPropValues();
 		}
-	};
-	Comparator<Researcher> vertaaja2 = new Comparator<Researcher>(){
-		public int compare(Researcher p1, Researcher p2) {
-			if (p1.getPositionInOrganization() < p2.getPositionInOrganization()) return -1;
-			if (p1.getPositionInOrganization() > p2.getPositionInOrganization()) return 1;
-			if (p1.getCitations() < p2.getCitations()) return -1;
-			if (p1.getCitations() > p2.getCitations()) return 1;
-			return 0;
+		catch (Exception e) {}
+	}
+
+	//Constructor if file exists
+	public simulation(String referenceStateFile, String expFile) {
+		getPropertyValues configfile = new getPropertyValues(referenceStateFile); //lacks other file as a parameter
+		getPropertyValues experimentfile = new  getPropertyValues(expFile);
+		try {
+		configs = configfile.getPropValues();
+		experiment = experimentfile.getPropValues();
 		}
-	};
+		catch (Exception e) {}
+	}
 	
-	public void initialize()
-	{
-	
-// Initialize a researcher array (with random research skills and right amount of  instances to each level
-	for (int i=0; i<4;i++)
-	{
+	public void simulate()  {
 		
-		for (int j=0; j<M.PositionLevels[i];j++)
-		{
-		researcherArray.add(new Researcher(RandomGenerator.nextSessionId() , 0, randomGenerator.createResSkill(), randomGenerator.createSkill(), 0, 0, i+1));	
-		}
-	}
-	}
-	
-
-	public void RemoveResearchers() 
-	{
-		for (int i=0;i<4;i++) {ResignByLevels[i]=0;
-		RetirementAge[i]=0;}
-		for (Researcher ukkeli : researcherArray) 
-		{
-			ukkeli.consumeMoney();	
-			ukkeli.addYear();
-			if (ukkeli.getYearsInAcademia() >= M.sackingAge[3] && randomGenerator.createRandomDouble() >= M.sackingResistance) 
-			{
-				ukkeli.setSackingProbability(1.);
-			}
-			if (ukkeli.getLeavingOrganization()) 
-				{ 
-				TempResearchersToBeRemoved.add(ukkeli); 
-				ResignByLevels[ukkeli.getPositionInOrganization()-1]++;
-				RetirementAge[ukkeli.getPositionInOrganization()-1]+=ukkeli.getYearsInAcademia();
-				}		
-		}
-		for (Researcher ukkeli: TempResearchersToBeRemoved)
-		{
-			for(Paper lappu: ukkeli.papers)
-			{
-				oldPapers.add(lappu); //kerätään talteen
-			}
-			researcherArray.remove(ukkeli);
-		}
-		TempResearchersToBeRemoved.clear();
-	}
-	
-	public void CountByLevels()
-	{
-	for (int i=0;i<4; i++)
-	{
-		ResearchersByLevels[i]=0;
-		PapersByLevels[i]=0;
-		CitationsByLevels[i]=0;
-		SkillByLevels[i]=0.;
-		FrustrationByLevels[i]=0.;
-	}
-	for (Researcher ukkeli : researcherArray) 
-	{
-		ResearchersByLevels[ukkeli.getPositionInOrganization()-1]++;	
-		PapersByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getPapers();	
-		CitationsByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getCitations();	
-		SkillByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getResearchSkill();
-		FrustrationByLevels[ukkeli.getPositionInOrganization()-1]+=ukkeli.getFrustration();
-	}
+		M.resetModel(configs);
+		M.configureExperiments(experiment);
+		mon.setHeadings();	
+		runFactors(M.factorName, M.factorValues,M.factorName.size()-1,"");
+		//mon.logNarrative();
 	}
 
-	public void AddResearchers()
-	{
-		CountByLevels();
-		int temp= ResearchersByLevels[0]+ResearchersByLevels[1]+ResearchersByLevels[2]+ResearchersByLevels[3];
-		for (int i=0;i< M.PopulationSize-temp;i++)
-		{
-			researcherArray.add(new Researcher(RandomGenerator.nextSessionId() , 0, randomGenerator.createResSkill(), randomGenerator.createSkill(), 0, 0, 1));
-		}
-	}
-	
-	public void TTpromote() {
-
-		double[] citationaverage = new double[4]; 
-		CountByLevels();
-		if(M.promotionModel=="Citation_based"){
-			for (int i=0;i<4;i++)
-			{
-				citationaverage[i]= CitationsByLevels[i]/((double) ResearchersByLevels[i]);
-				PromoteByLevels[i]=0;
-				PromotionAge[i]=0;
-			}
-			
-			for (int i=3;i>0; i--)
-			{
-					for(Researcher dude : researcherArray) {
-					if (dude.getPositionInOrganization() == i &&  dude.getYearsInAcademia() >= M.sackingAge[i-1] && (dude.getCitations() >= M.promotionTreshold*citationaverage[i-1])) 
-					{
-						dude.setPositionInOrganization(i+1);
-						PromoteByLevels[i-1]++;
-						PromotionAge[i-1]+=dude.getYearsInAcademia();
-					}
-				}				
-			}			
-		}
-		if(M.promotionModel=="Position_based"){
-			for (int i=0;i<4;i++)
-			{
-				citationaverage[i]= CitationsByLevels[i]/((double) ResearchersByLevels[i]);
-				PromoteByLevels[i]=0;
-				PromotionAge[i]=0;
-			}
-			
-			for (int i=3;i>0; i--)
-			{
-					for(Researcher dude : researcherArray) {
-					if (dude.getPositionInOrganization() == i &&  dude.getYearsInPosition() >= M.sackingAge[i-1] && (dude.getCitations() >= M.promotionTreshold*citationaverage[i-1])) 
-					{
-						dude.setPositionInOrganization(i+1);
-						PromoteByLevels[i-1]++;
-						PromotionAge[i-1]+=dude.getYearsInAcademia();
-					}
-				}				
-			}			
-		}
-
-		if(M.promotionModel=="Citation_only"){
-			for (int i=0;i<4;i++)
-			{
-				citationaverage[i]= CitationsByLevels[i]/((double) ResearchersByLevels[i]);
-				PromoteByLevels[i]=0;
-				PromotionAge[i]=0;
-			}
-			for (int i=3;i>0; i--)
-			{
-					for(Researcher dude : researcherArray) {
-					if (dude.getPositionInOrganization() == i && (dude.getCitations() >= M.promotionTreshold*citationaverage[i-1])) 
-					{
-						dude.setPositionInOrganization(i+1);
-						PromoteByLevels[i-1]++;
-						PromotionAge[i-1]+=dude.getYearsInAcademia();
-					}
-				}			
-			}
-		}
-		if(M.promotionModel=="Fixed_HC"){
-			for (int i=0;i<4;i++)
-			{
-//				citationaverage[i]= CitationsByLevels[i]/((double) ResearchersByLevels[i]);
-				PromoteByLevels[i]=M.PositionLevels[i]-ResearchersByLevels[i];// näin monta tarvitaan lisää alemmilta tasoilta
-				PromotionAge[i]=0;
-			}
-			Collections.sort(researcherArray, vertaaja2);
-			Collections.reverse(researcherArray);
-			int ii=3;
-			int jj=0;
-			
-			for(Researcher dude : researcherArray) {
-				if(dude.getPositionInOrganization() < ii) {
-					if(jj< PromoteByLevels[ii]) {
-						System.out.println(jj+" "+PromoteByLevels[ii]);
-						PromoteByLevels[ii]=jj;
-						}
-					PromoteByLevels[ii-1]+=PromoteByLevels[ii];
-					ii--;
-					jj=0;
-				}
-				if(dude.getPositionInOrganization() == ii && jj < PromoteByLevels[ii])
-				{
-					dude.setPositionInOrganization(ii+1);
-					jj++;
-					PromotionAge[ii-1]+=dude.getYearsInAcademia();
-				}
-			}
-			for (int i=0; i<3; i++){
-			PromoteByLevels[i]=PromoteByLevels[i+1];
-			}
-			PromoteByLevels[3]=0;
-		}
-	}
 		
-
-	public void evenAllocation() {
-		double nettoTutkimusResurssit = M.maksimiTutkimusResurssi*M.AllocatableResource; 
-		double varmatTutkimusResurssit = nettoTutkimusResurssit*M.kuinkaPaljonJaetaanTasan; //Jaetaan tasaisesti populaation kesken
-		double varmatTutkimusResurssitPerTutkija = varmatTutkimusResurssit/researcherArray.size();
-		for (Researcher researcher: researcherArray) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			researcher.setTimeForResearch();
-		}		
-	}
-	
-	public void randomAllocation() {
-		double nettoTutkimusResurssit = M.maksimiTutkimusResurssi*M.AllocatableResource; 
-		double varmatTutkimusResurssit = nettoTutkimusResurssit*M.kuinkaPaljonJaetaanTasan; //Jaetaan tasaisesti populaation kesken
-		double varmatTutkimusResurssitPerTutkija = varmatTutkimusResurssit/researcherArray.size();
-		funder.funds.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit); 
-		funder.funds.varmaFunding = varmatTutkimusResurssitPerTutkija;
-
-		Collections.shuffle(researcherArray);//sekoitetaan
-
-		for (Researcher researcher: researcherArray) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			funder.receiveResearcher(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-		}		
-	}
-
-	public void grantAllocation(double arviointiVirhe) {
-		ArrayList<Researcher> temp2 = new ArrayList<>();
-		ArrayList<Researcher> temp3 = new ArrayList<>();
-		ArrayList<Researcher> temp4 = new ArrayList<>();
-		double nettoTutkimusResurssit = (1-M.overhead)*M.maksimiTutkimusResurssi*M.AllocatableResource; 		
-		double varmatTutkimusResurssit = nettoTutkimusResurssit*M.kuinkaPaljonJaetaanTasan; 
-		double varmatTutkimusResurssitPerTutkija = varmatTutkimusResurssit/researcherArray.size();
-		funder.funds.varmaFunding = varmatTutkimusResurssitPerTutkija;
-
-		for (Researcher researcher: researcherArray) {
-			researcher.setQualityOfApplication(arviointiVirhe);
-			int taso =researcher.getPositionInOrganization();
-			if (taso==2) {
-				temp2.add(researcher);
-			}
-			if (taso==3) {
-				temp3.add(researcher);
-			}
-			if (taso==4) {
-				temp4.add(researcher);
-			}
-		}
-		for (Researcher researcher: temp2)
-		{
-			researcherArray.remove(researcher);
-		}
-		for (Researcher researcher: temp3)
-		{
-			researcherArray.remove(researcher);
-		}
-		for (Researcher researcher: temp4)
-		{
-			researcherArray.remove(researcher);
-		}
+	public void runFactors(ArrayList<String> fName, ArrayList<String> fValues, int expNumber, String instance) {
 		
-		Collections.sort(researcherArray, vertaaja);
-
-		Collections.reverse(researcherArray);
-		funder.funds.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*researcherArray.size()/M.PopulationSize; 
-		for (Researcher researcher: researcherArray) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.receiveResearcher(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-		}
-		Collections.sort(temp2, vertaaja);
-
-		Collections.reverse(temp2);
-		funder.funds.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*temp2.size()/M.PopulationSize; 
-		for (Researcher researcher: temp2) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.receiveResearcher(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-			researcherArray.add(researcher);
-		}
-		Collections.sort(temp3, vertaaja);
-
-		Collections.reverse(temp3);
-		funder.funds.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*temp3.size()/M.PopulationSize; 
-		for (Researcher researcher: temp3) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.receiveResearcher(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-			researcherArray.add(researcher);
-		}
-		Collections.sort(temp4, vertaaja);
-
-		Collections.reverse(temp4);
-		funder.funds.funding =(nettoTutkimusResurssit-varmatTutkimusResurssit)*temp4.size()/M.PopulationSize; 
-		for (Researcher researcher: temp4) {
-			researcher.setResourcesNeededToBeMotivated(M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan);
-			researcher.setMoney(varmatTutkimusResurssitPerTutkija); 
-			funder.receiveResearcher(researcher, M.kuinkaPaljonMaksimiTutkimisResurssistaHalutaan-varmatTutkimusResurssitPerTutkija);
-			researcher.setTimeForResearch();
-			researcherArray.add(researcher);
-		}
-		temp2.clear();
-		temp3.clear();
-		temp4.clear();
-	}
-	
-
-
-public void publishTT(int currentYear) {
-	
-	for (int i=0;i<4;i++)
-	{
-		CurrentPapers[i]=0;
-		CurrentCitations[i]=0;
-	}
-		for(Researcher researcher : researcherArray) {
-			researcher.publish(currentYear);
-		}
-		
-		citationsFromRemovedResearchers=0;	
-		papersFromRemovedResearchers=0;
-		for(Paper lappu:oldPapers) {
-			citationsFromRemovedResearchers+=lappu.updateCitationsTT(currentYear);
-			papersFromRemovedResearchers++;
-			if(lappu.isDead()) {removedPapers.add(lappu);}
-		}
-		for(Paper lappu:removedPapers) {
-			oldPapers.remove(lappu);
-		}
-		removedPapers.clear();
-	}
-
-	private void compareReceivedMoney() {
-		mon.res=0;
-		for (Researcher researcher : researcherArray) {
-			mon.res+=researcher.getResourcesForResearch();
-			researcher.setTotalFrustration();
-			researcher.setProductivity();
+		String name = fName.get(expNumber);
+		String values = fValues.get(expNumber);
+		String parsedValues[] = values.split(",");
+		for(int i=0; i< parsedValues.length; i++) {
+			M.setFactor(name, parsedValues[i]);
+			String newInstance = instance+";"+ parsedValues[i];
+			if(expNumber >0) {
+				runFactors(fName, fValues, expNumber-1,newInstance);}
+			else {
+				runExperiment(newInstance);
+			}
 		}
 	}
 	
-	public int getTotalCitations() {
-		totalCitations = 0;
-		for (Researcher dude : researcherArray) {
-			totalCitations += dude.getCitations();
-		}
-		return totalCitations;
+	public void runExperiment(String instance) {
+		year = 0;
+		O.initialize ();
+		mon.resetCounters();
+		iterate(M.warmUp);
+		for (int sample=0; sample < M.repetitionCount; sample++){
+			mon.resetCounters();
+			iterate(M.runLength); // single sample
+			mon.logReport2(M.runLength, instance);
+			iterate(M.safetyDistance); //separation
+		} //end sampling
+		O.researcherArray.clear();
+		O.oldPapers.clear();
 	}
-
-	public int getTotalPapers() {
-		totalPapers = 0;
-		for (Researcher dude : researcherArray) {
-			totalPapers += dude.getPapers();
-		}
-		return totalPapers;
-	}
-
-	public void allocate(){
-		if(M.allocationScheme=="Communism") {evenAllocation();}
-		if(M.allocationScheme=="Lottery") {randomAllocation();}
-		if(M.allocationScheme=="Grant") {grantAllocation(M.arviointiVirhe);} 
-		}
 	
-
+	
 	public void iterate (int count){
 		for (int loop=0; loop< count; loop++) 
 		{
-			RemoveResearchers();
-			TTpromote();
-			AddResearchers();
-			allocate();
-			compareReceivedMoney(); //Compare what got and what not, sets frustration and productivity
-			publishTT(year);
-			CountByLevels();
+			O.RemoveResearchers();
+			O.promote();
+			O.AddResearchers();
+			funder.allocate();
+			O.compareReceivedMoney(); //Compare what got and what not, sets frustration and productivity
+			O.publish(year);
+			O.CountByLevels();
 			mon.updateCounters();
 			year++;
 		}
 		
 	}
-	public void simulate()  {
-		M.resetGrant();
-		M.configureFulltest64b(0);; //to initialize the headings
-		mon.setHeadings();
-		M.setNarrative();
-		for(int koe=0; koe<64 ; koe++) 
-		{
-			M.configureFulltest64b(koe);
-			initialize();
-			mon.resetCounters();
-			iterate(100); //warm up
-			for (int sample=0; sample < 10; sample++)
-			{
-				mon.resetCounters();
-				iterate(200); // single sample
-				mon.logReport(200);
-//				System.out.println(mon.cumRes);
-				iterate(50); //separation
-
-			} //end sampling
-
-			researcherArray.clear();
-			oldPapers.clear();
-			year = 0;
-		} //end koe
-		mon.logNarrative();
-		
-
-	}
-
+	
 	
 
 	/** This is the main method for simulation 
-	 * @param args
+	 * @param args referenceStateFile, experimentFile
 	 */
 	public static void main(String[] args) {
 		
-		//From package configreader
-		getPropertyValues configfile = new getPropertyValues();
-		
-		try {
-			//List all the properties
-			System.out.println(configfile.getPropValues());
-			
-			//print unique property
-			System.out.println(configfile.getPropValues().getProperty("populationsize"));
-		} catch (IOException e) {
-			System.out.println("No config found!");
-			e.printStackTrace();
-		}
+		simulation test = null;
 		
 		/**
-		 * Simulation itself added to comments for now, fileread example above
+		 * Tries parameters. Runs as .jar as follows: "java -jar simulation.jar file1.conf file2.conf"
 		 */
-		//	simulation test = new simulation();
-		//	test.simulate();
-		
+	    try {
+	    	
+	    	test = new simulation(args[0], args[1]);
+	    	
+	    }
+	    catch (ArrayIndexOutOfBoundsException e){
+	    	
+	        System.out.println("ArrayIndexOutOfBoundsException caught: " + e + " no simulation setting file parameters given, using defaults");
+	        
+	        test = new simulation();
+	    }
+	    finally {
+	    	
+	    	test.simulate();
+	    }
+	    		
 	}
 
 }

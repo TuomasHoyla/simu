@@ -1,0 +1,134 @@
+PEGS simulator - instructions
+
+Reference: The consequences of competition: simulating the effects of research grant allocation strategies, T. Höylä, C. Bartneck, T. Tiihonen, Scientometrics, 2016 (DOI: 10.1007/s11192-016-1940-3)
+
+Source code: on request (timo.tiihonen@jyu.fi)
+
+Package content:
+- instructions.txt (this file)
+- simulation.jar runnable jar-file
+- demo_config.txt (sample configuration file)
+- demo_experiment.txt (sample experiment configuration file)
+- resources -folder with two .properties files (for running default scenario)
+- results -folder for writing results (used by default and demo experiments)
+- (sample configs + results?)
+
+First steps
+
+1. Download and extract the simulation.zip -file to your local drive. 
+2. Go to simulation folder (with command prompt) and type 'java -jar simulation.jar'. This should produce two result files to result -folder. Type 'java -jar simulation.jar demo_config.txt demo_experiment.txt'. This should make two more result files to the result folder.
+3. Feel free to play around with copying and modifying configuration files for making your own runs. Notice that the simulator writes (appends) two files (*datafile.txt and *totalfile.txt) to location specified by used experiment configuration file. Hence you easily end up having results of several runs in the same file. Nothing is lost but the further analysis may get complicated. So be systematic in creating and naming new experiments.
+
+Configuration files
+
+All model parameters that can be varied are collected to configuration file. The parameters controlling the simulation (amount of repetitions, durations, initializations of random streams) are in experiment config file. This file also contains the actual experiment design (from one to 10 factors and their studied values). Reading the configuration files is not very robust. So typing errors and even extra spaces at ends of lines may cause a variable being missed and simulation craching. Try small examples first.
+
+The contents and possible windows for values for the configuration file are as follows:
+
+# population parameters
+levelCount=4 #amount of different career levels [2-8]
+positionLevels=25,25,25,25 #initial amount of staff on each level [nonnegative for each level, especially if FixedHC is used]
+promotionModel = FixedHC #[FixedHC, Position_based, Citation_only]
+promotionTreshold = 1.5 # c_prom >1
+sackingAge=4,4,8,32 # time in position after which promotion and resignation are possible
+sackingResistance=0.75 # probability of not retiring (on highest level) after reaching resignation time
+#funding related parameters
+evaluationErrorModel=Blended # [Blended, Mult, Sum] different error types to evaluation result
+evaluationError=0.5 # magnitude of evaluation error (non negative)
+overhead = 0.05 # amount of administrative overhead (<1)
+evenlyDistributedPart = 0 # amount of resource distributed evenly to each researcher (<=1)
+resourceLevel=0.5 # proportion or research resources to the total working time of population (<1)
+defaultResearchShare=0. # amount of resource distributed evenly to each researcher (<=1)
+#publishing related parameters
+productivityCoefficient=0.5 # c_prod from (22) (<1)
+paperQualityModel = Random_Skill_based # [Random_Skill_Based, Skill_Based] (in latter all papers of equal quality)
+#researcher related parameters
+applyingIntensity=0.2 # proportion of defaultResearchShare used to applying
+defaultMonetaryFrustration = 0 # monetary frustration after promotion] 
+frustrationRate=0.1,0.2,0.1,0 # rate of build up of frustration c_frus1 in (25) for each position ladder
+secondaryFrustrationRate=0.0 #c_frus2 from (25) controlling non-monotonous frustration build up
+defaultPromotionalFrustration = 0 # default promotional frustration after promotion]
+promotionalFrustrationModel=Time_in_Position # [Academic_Age, Time_in_Position] (how to count years to frustration Age)
+promotionalFrustrationAge=4,4,8,33 # years when promotional frustration starts to grow on each ladder
+promotionalFrustrationRate=0.2,0.2,0.1,0 # yearly rate for build up of promotional frustration
+monetaryFrustrationWeight=1.0 # weight of monetary frustration in total frustration/resignation decision 
+promotionalFrustrationWeight=1.0 # weight of promotional frustration in total frustration/resignation decision 
+frustrationProductivityWeight=1. # weight of frustration in productivity (per unit time) for papers
+monetaryProductivityWeight=0.0 # weight of resource level for unit time productivity for papers (values > 0 give multiplier effect to resources)
+resSkillWeight=.5 # fraction of research skill (0-1) in quality of applications (rest being writing skill based
+fitnessVariance=0.25 # variance of (log of) papers' fitness (on population level)
+fitnessSkillFactor=0.5 # proportion of variability of skills in population level papers' fitness (rest being variability within individual's papers)
+
+
+The parameters for experiment set up are as follows:
+
+# directory for result files
+workingdirectory=results\\demo #directory and caseidentifier for result files
+# parameters for simulation run
+researcherSeed=1000000000 # seed to RNG producing researcher related streams
+paperSeed=3000000000 # seed to RNG to produce paper related streams
+warmUp =200 # amount of years for warm up when starting the system
+repetitionCount =2 # amount of independent runs per experiment point
+runLength =200 # length of run/observation for experiment point
+safetyDistance = 50 # unobserved distance to separate consequtive observations
+# specification of the experiment
+# name of experiment
+caseheader = Maintest # identifier to the result files
+# factors[0-9] as name:value1,value2,etc, # up to 10 factors with names and values
+factor0=secondaryFrustrationRate:0,0.05
+factor1=allocationScheme:Communism,Lottery,Capitalism,Idealism
+
+Most of configuration parameters are possible to use as factors:
+
+promotionModel:FixedHC,Position_based,Citation_only
+evaluationErrorModel:Blended,Mult,Sum
+paperQualityModel:Random_Skill_Based,Skill_Based 
+promotionalFrustrationModel:Academic_Age, Time_in_Position
+
+promotionTreshold
+sackingResistance
+evaluationError
+overhead
+evenlyDistributedPart
+resourceLevel
+defaultResearchShare
+productivityCoefficient
+applyingIntensity
+defaultMonetaryFrustration
+secondaryFrustrationRate
+defaultPromotionalFrustration
+monetaryFrustrationWeight
+promotionalFrustrationWeight
+frustrationProductivityWeight
+monetaryProductivityWeight
+resSkillWeight
+fitnessVariance
+fitnessSkillFactor
+
+Moreover, there is factor 
+allocationScheme:Communism,Lottery,Capitalism,Idealism
+
+
+Outputs:
+Two output files are generated. Both are semi-colon separated text files with headers and values for factors and output variables.
+- first column is a dummy that can be ignored/removed when analyzing the results
+- next columns are the values of factors for the experiment in question (amount of columns depends on configuration of the experiment).
+- for ...totalfile.txt the data columns give yearly totals of the following quantities
+-- Skill: sum of skills of all researchers (yearly average over the observation period)
+-- Frustration: sum of frustration levels of all researchers (yearly average)
+-- YearlyPapers: sum of publications produced by researchers in a  year (yearly average)
+-- YearlyCitations: sum of citations to publications of current researchers within a year (yearly average)
+-- OldCitations: amount of yearly citations to papers by resigned researchers (yearly average)
+-- OldPapers: amount of "active" papers by resigned researchers (yearly average)
+-- Recruitments: amount of new recruitments per year (yearly average)
+- for ...datafile.txt the data is given a sums over researchers on each career level
+-- Ladder: identifier of career ladder
+-- HeadCount: amount of researchers on given career level (yearly average)
+-- Skill: average personal skill (yearly average) 
+-- YearlyPapers: average amount of yearly papers per researcher (yearly average) 
+-- YearlyCitations: average amount of citations per researcher (yearly average) 
+-- Resignations: average amount of resignations per person year (yearly average) 
+-- Promotions: average amount of promotions per person year (yearly average) 
+-- Frustration: average level of personal frustration (yearly average) 
+-- RetirementAge: average count of service years at time of resignation (yearly average) 
+-- PromotionAge: average count of service years at the time of promotion (yearly average)
