@@ -1,3 +1,7 @@
+Source code for
+
+http://www.bartneck.de/publications/2016/PEGS/bartneckCompetition2016.pdf
+
 # simulation
 
 Git instructions
